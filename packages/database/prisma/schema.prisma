@@ -1,0 +1,454 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== AUTH ====================
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  phone         String?
+  role          UserRole  @default(PARENT)
+
+  accounts      Account[]
+  sessions      Session[]
+  bookings      Booking[]
+  assessments   Assessment[]
+  children      Child[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum UserRole {
+  ADMIN
+  THERAPIST
+  PARENT
+}
+
+// ==================== CORE MODELS ====================
+model Child {
+  id          String   @id @default(cuid())
+  name        String
+  birthDate   DateTime
+  gender      Gender?
+  parentId    String
+  parent      User     @relation(fields: [parentId], references: [id], onDelete: Cascade)
+
+  assessments Assessment[]
+  bookings    Booking[]
+  progress    ProgressRecord[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String   @db.Text
+  shortTitle  String?
+  shortDesc   String?
+  subtitle    String?
+  longDescription String? @db.Text
+  highlights  String[]
+  benefits    String[]
+  process     Json?
+  stats       Json?
+  reviewText  String?  @db.Text
+  reviewAuthor String?
+  reviewRelation String?
+  reviewLocation String?
+  icon        String?
+  image       String?
+  category    ServiceCategory
+  duration    Int
+  price       Decimal  @db.Decimal(10, 2)
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+
+  bookings    Booking[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum ServiceCategory {
+  CHILD_THERAPY
+  ADULT_REHAB
+  CONSULTATION
+}
+
+model Booking {
+  id          String        @id @default(cuid())
+  userId      String
+  childId     String?
+  serviceId   String
+  date        DateTime
+  startTime   String
+  endTime     String
+  status      BookingStatus @default(PENDING)
+  notes       String?       @db.Text
+
+  user        User          @relation(fields: [userId], references: [id])
+  child       Child?        @relation(fields: [childId], references: [id])
+  service     Service       @relation(fields: [serviceId], references: [id])
+  reminders   BookingReminder[]
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+// ==================== AI ASSESSMENT ====================
+model Assessment {
+  id            String   @id @default(cuid())
+  userId        String?
+  childId       String?
+  sessionId     String   @unique
+
+  childAge      String?
+  childGender   String?
+  previousDiagnosis String?
+  concernAreas  String[]
+
+  soundSensitivity    Int?
+  touchSensitivity    Int?
+  eyeContact          Int?
+  sittingDifficulty   Int?
+  anxietyLevel        Int?
+  letterConfusion     Int?
+
+  playBehavior        String?
+  routineReaction     String?
+  motorSkills         String?
+  teacherFeedback     String?  @db.Text
+  mainConcern         String?  @db.Text
+
+  mediaUrls           String[]
+
+  aiAnalysis          Json?
+  aiRecommendations   String?  @db.Text
+
+  status              AssessmentStatus @default(IN_PROGRESS)
+  completedAt         DateTime?
+
+  user                User?    @relation(fields: [userId], references: [id])
+  child               Child?   @relation(fields: [childId], references: [id])
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+enum AssessmentStatus {
+  IN_PROGRESS
+  COMPLETED
+  REVIEWED
+}
+
+// ==================== PROGRESS TRACKING ====================
+model ProgressRecord {
+  id          String   @id @default(cuid())
+  childId     String
+  sessionDate DateTime
+
+  sensoryScore       Int?
+  motorScore         Int?
+  socialScore        Int?
+  communicationScore Int?
+
+  notes         String?  @db.Text
+  therapistNotes String? @db.Text
+
+  child       Child    @relation(fields: [childId], references: [id])
+
+  createdAt   DateTime @default(now())
+}
+
+// ==================== CONTENT ====================
+model BlogPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  excerpt     String?
+  summary     String?  @db.Text
+  content     String   @db.Text
+  coverImage  String?
+  category    String?
+  tags        String[]
+  readTime    String?
+  keyPoints   String[] @default([])
+  tips        String[] @default([])
+  sources     Json?
+  isFeatured  Boolean  @default(false)
+  featuredOrder Int    @default(0)
+  isPublished Boolean  @default(false)
+  publishedAt DateTime?
+  viewCount   Int      @default(0)
+
+  author      String   @default("Volkan Özcihan")
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AdminPasswordReset {
+  id        String   @id @default(cuid())
+  adminId   String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  admin     AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+}
+
+model Testimonial {
+  id          String   @id @default(cuid())
+  name        String
+  relation    String
+  location    String?
+  content     String   @db.Text
+  rating      Int      @default(5)
+  serviceType String?
+  isApproved  Boolean  @default(false)
+  isFeatured  Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+}
+
+model ContactSubmission {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  subject     String?
+  message     String   @db.Text
+  source      String?
+  isRead      Boolean  @default(false)
+  isReplied   Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+}
+
+model NewsletterSubscriber {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String?
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+}
+
+// ==================== ADMIN ====================
+model AdminUser {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  passwordHash  String
+  name          String?
+  lastLoginAt   DateTime?
+
+  sessions      AdminSession[]
+  passwordResets AdminPasswordReset[]
+  contentRevisions ContentRevision[]
+  legalRevisions   LegalPageRevision[]
+  mediaAssets      MediaAsset[]
+  backupExports    BackupExport[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model AdminSession {
+  id         String    @id @default(cuid())
+  adminId    String
+  token      String    @unique
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+
+  admin      AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+}
+
+// ==================== CONTENT SETTINGS ====================
+model AppSetting {
+  key        String   @id
+  value      Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ContentEntry {
+  id         String            @id @default(cuid())
+  key        String            @unique
+  data       Json
+  status     ContentStatus     @default(PUBLISHED)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  revisions  ContentRevision[]
+}
+
+model ContentRevision {
+  id          String     @id @default(cuid())
+  contentId   String
+  data        Json
+  createdAt   DateTime   @default(now())
+  createdById String?
+
+  content     ContentEntry @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  createdBy   AdminUser?   @relation(fields: [createdById], references: [id])
+}
+
+model LegalPage {
+  id          String              @id @default(cuid())
+  slug        String              @unique
+  title       String
+  content     String              @db.Text
+  isPublished Boolean             @default(true)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  revisions   LegalPageRevision[]
+}
+
+model LegalPageRevision {
+  id           String     @id @default(cuid())
+  legalPageId  String
+  title        String
+  content      String     @db.Text
+  createdAt    DateTime   @default(now())
+  createdById  String?
+
+  legalPage    LegalPage  @relation(fields: [legalPageId], references: [id], onDelete: Cascade)
+  createdBy    AdminUser? @relation(fields: [createdById], references: [id])
+}
+
+model MediaAsset {
+  id          String     @id @default(cuid())
+  url         String
+  storagePath String?
+  type        MediaType
+  title       String?
+  altText     String?
+  width       Int?
+  height      Int?
+  size        Int?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  createdById String?
+
+  createdBy   AdminUser? @relation(fields: [createdById], references: [id])
+}
+
+model BackupExport {
+  id          String       @id @default(cuid())
+  status      BackupStatus @default(PENDING)
+  fileUrl     String?
+  fileKey     String?
+  errorMessage String?
+  createdAt   DateTime     @default(now())
+  completedAt DateTime?
+  createdById String?
+
+  createdBy   AdminUser?   @relation(fields: [createdById], references: [id])
+}
+
+model BookingReminder {
+  id            String         @id @default(cuid())
+  bookingId     String
+  reminderType  ReminderType
+  offsetMinutes Int?
+  sendAt        DateTime
+  sentAt        DateTime?
+  status        ReminderStatus @default(PENDING)
+  errorMessage  String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  booking       Booking        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+}
+
+enum BackupStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum ReminderType {
+  CONFIRMATION
+  REMINDER
+  THANK_YOU
+}
+
+enum ReminderStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}

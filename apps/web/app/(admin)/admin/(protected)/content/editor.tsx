@@ -1,0 +1,1244 @@
+﻿"use client";
+
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
+import type {
+  HomeContent,
+  AboutContent,
+  BookingContent,
+  AssessmentContent,
+  TherapyContent,
+  ContactContent,
+  BlogContent,
+  ServicesPageContent
+} from "@/lib/content-defaults";
+
+type ContentEditorProps = {
+  contentKey: string;
+  title: string;
+  initialContent: unknown;
+};
+
+type FieldDef = {
+  key: string;
+  label: string;
+  type?: "text" | "textarea" | "number";
+  placeholder?: string;
+};
+
+type ListEditorProps = {
+  label: string;
+  items: Record<string, any>[];
+  fields: FieldDef[];
+  emptyItem: Record<string, any>;
+  onChange: (items: Record<string, any>[]) => void;
+};
+
+const inputClasses =
+  "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm";
+const labelClasses = "text-xs font-medium text-slate-600";
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+      <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+      {children}
+    </div>
+  );
+}
+
+function TextField({
+  label,
+  value,
+  onChange,
+  placeholder
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}) {
+  return (
+    <label className="block space-y-1 text-sm">
+      <span className={labelClasses}>{label}</span>
+      <input
+        className={inputClasses}
+        value={value}
+        placeholder={placeholder}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    </label>
+  );
+}
+
+function NumberField({
+  label,
+  value,
+  onChange
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <label className="block space-y-1 text-sm">
+      <span className={labelClasses}>{label}</span>
+      <input
+        type="number"
+        className={inputClasses}
+        value={Number.isFinite(value) ? value : 0}
+        onChange={(event) => onChange(Number(event.target.value || 0))}
+      />
+    </label>
+  );
+}
+
+function TextAreaField({
+  label,
+  value,
+  onChange,
+  rows = 3
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  rows?: number;
+}) {
+  return (
+    <label className="block space-y-1 text-sm">
+      <span className={labelClasses}>{label}</span>
+      <textarea
+        rows={rows}
+        className={`${inputClasses} resize-none`}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    </label>
+  );
+}
+
+function StringListField({
+  label,
+  value,
+  onChange
+}: {
+  label: string;
+  value: string[];
+  onChange: (value: string[]) => void;
+}) {
+  return (
+    <label className="block space-y-1 text-sm">
+      <span className={labelClasses}>{label}</span>
+      <textarea
+        rows={4}
+        className={`${inputClasses} resize-none`}
+        value={value.join("\n")}
+        onChange={(event) =>
+          onChange(
+            event.target.value
+              .split("\n")
+              .map((line) => line.trim())
+              .filter(Boolean)
+          )
+        }
+      />
+      <p className="text-xs text-slate-400">Her satira bir madde yazin.</p>
+    </label>
+  );
+}
+
+function ObjectListField({ label, items, fields, emptyItem, onChange }: ListEditorProps) {
+  const updateItem = (index: number, key: string, value: any) => {
+    const next = items.map((item, idx) =>
+      idx === index ? { ...item, [key]: value } : item
+    );
+    onChange(next);
+  };
+
+  const addItem = () => {
+    onChange([...items, { ...emptyItem }]);
+  };
+
+  const removeItem = (index: number) => {
+    onChange(items.filter((_, idx) => idx !== index));
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-slate-700">{label}</span>
+        <button
+          type="button"
+          onClick={addItem}
+          className="text-xs font-medium text-primary-600 hover:underline"
+        >
+          + Ekle
+        </button>
+      </div>
+      {items.length === 0 && (
+        <p className="text-xs text-slate-400">Liste bos.</p>
+      )}
+      {items.map((item, index) => (
+        <div
+          key={`${label}-${index}`}
+          className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3"
+        >
+          <div className="grid gap-3 md:grid-cols-2">
+            {fields.map((field) => {
+              const value = item[field.key] ?? "";
+              if (field.type === "textarea") {
+                return (
+                  <TextAreaField
+                    key={field.key}
+                    label={field.label}
+                    rows={3}
+                    value={String(value)}
+                    onChange={(nextValue) => updateItem(index, field.key, nextValue)}
+                  />
+                );
+              }
+              if (field.type === "number") {
+                return (
+                  <NumberField
+                    key={field.key}
+                    label={field.label}
+                    value={Number(value) || 0}
+                    onChange={(nextValue) => updateItem(index, field.key, nextValue)}
+                  />
+                );
+              }
+              return (
+                <TextField
+                  key={field.key}
+                  label={field.label}
+                  value={String(value)}
+                  placeholder={field.placeholder}
+                  onChange={(nextValue) => updateItem(index, field.key, nextValue)}
+                />
+              );
+            })}
+          </div>
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => removeItem(index)}
+              className="text-xs text-red-600 hover:underline"
+            >
+              Sil
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default function ContentEditor({ contentKey, title, initialContent }: ContentEditorProps) {
+  const [form, setForm] = useState<any>(initialContent);
+  const [isSaving, setIsSaving] = useState(false);
+  const [featuredJson, setFeaturedJson] = useState(() => {
+    if (contentKey !== "blog") {
+      return "";
+    }
+    const blog = initialContent as BlogContent;
+    return JSON.stringify(blog.featuredArticles, null, 2);
+  });
+  const [featuredError, setFeaturedError] = useState<string | null>(null);
+
+  const updateField = (path: string, value: any) => {
+    setForm((prev: any) => {
+      const next = structuredClone(prev);
+      const keys = path.split(".");
+      let current = next;
+      keys.slice(0, -1).forEach((key) => {
+        if (!current[key]) {
+          current[key] = {};
+        }
+        current = current[key];
+      });
+      current[keys[keys.length - 1]] = value;
+      return next;
+    });
+  };
+
+  const handleSave = async () => {
+    if (contentKey === "blog" && featuredError) {
+      toast.error("Featured JSON hatali. Once duzeltin.");
+      return;
+    }
+
+    let payload = form;
+    if (contentKey === "blog") {
+      try {
+        const parsed = JSON.parse(featuredJson || "[]");
+        payload = {
+          ...(form as BlogContent),
+          featuredArticles: Array.isArray(parsed) ? parsed : []
+        };
+      } catch (error) {
+        toast.error("Featured JSON hatali.");
+        return;
+      }
+    }
+
+    setIsSaving(true);
+    try {
+      const res = await fetch(`/api/admin/content/${contentKey}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: payload })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Kayit basarisiz");
+      }
+      setForm(data.data);
+      toast.success("Icerik kaydedildi.");
+    } catch (error: any) {
+      toast.error(error.message || "Kayit sirasinda hata olustu.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const home = useMemo(() => form as HomeContent, [form]);
+  const about = useMemo(() => form as AboutContent, [form]);
+  const servicesPage = useMemo(() => form as ServicesPageContent, [form]);
+  const booking = useMemo(() => form as BookingContent, [form]);
+  const assessment = useMemo(() => form as AssessmentContent, [form]);
+  const therapy = useMemo(() => form as TherapyContent, [form]);
+  const contact = useMemo(() => form as ContactContent, [form]);
+  const blog = useMemo(() => form as BlogContent, [form]);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
+          <p className="text-sm text-slate-500">Sayfa icerigini guncelleyin.</p>
+        </div>
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="rounded-lg bg-primary-500 text-white px-4 py-2 text-sm font-medium disabled:opacity-60"
+        >
+          {isSaving ? "Kaydediliyor..." : "Kaydet"}
+        </button>
+      </div>
+      {contentKey === "home" && (
+        <div className="space-y-6">
+          <Section title="Hero">
+            <TextField
+              label="Badge"
+              value={home.hero.badge}
+              onChange={(value) => updateField("hero.badge", value)}
+            />
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Baslik"
+                value={home.hero.title}
+                onChange={(value) => updateField("hero.title", value)}
+              />
+              <TextField
+                label="Vurgu"
+                value={home.hero.highlight}
+                onChange={(value) => updateField("hero.highlight", value)}
+              />
+              <TextField
+                label="Baslik Sonu"
+                value={home.hero.titleSuffix}
+                onChange={(value) => updateField("hero.titleSuffix", value)}
+              />
+            </div>
+            <TextAreaField
+              label="Aciklama"
+              value={home.hero.description}
+              onChange={(value) => updateField("hero.description", value)}
+              rows={4}
+            />
+            <StringListField
+              label="Basarilar"
+              value={home.hero.achievements}
+              onChange={(value) => updateField("hero.achievements", value)}
+            />
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Birincil CTA Etiketi"
+                value={home.hero.primaryCta.label}
+                onChange={(value) => updateField("hero.primaryCta.label", value)}
+              />
+              <TextField
+                label="Birincil CTA Link"
+                value={home.hero.primaryCta.href}
+                onChange={(value) => updateField("hero.primaryCta.href", value)}
+              />
+              <TextField
+                label="Ikincil CTA Etiketi"
+                value={home.hero.secondaryCta.label}
+                onChange={(value) => updateField("hero.secondaryCta.label", value)}
+              />
+              <TextField
+                label="Ikincil CTA Link"
+                value={home.hero.secondaryCta.href}
+                onChange={(value) => updateField("hero.secondaryCta.href", value)}
+              />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Arka Plan Gorsel URL"
+                value={home.hero.backgroundImage.src}
+                onChange={(value) => updateField("hero.backgroundImage.src", value)}
+              />
+              <TextField
+                label="Arka Plan Alt"
+                value={home.hero.backgroundImage.alt}
+                onChange={(value) => updateField("hero.backgroundImage.alt", value)}
+              />
+              <TextField
+                label="Portre Gorsel URL"
+                value={home.hero.portraitImage.src}
+                onChange={(value) => updateField("hero.portraitImage.src", value)}
+              />
+              <TextField
+                label="Portre Alt"
+                value={home.hero.portraitImage.alt}
+                onChange={(value) => updateField("hero.portraitImage.alt", value)}
+              />
+            </div>
+            <ObjectListField
+              label="Hero Stat Kartlari"
+              items={home.hero.statCards}
+              onChange={(items) => updateField("hero.statCards", items)}
+              emptyItem={{ value: "", label: "" }}
+              fields={[
+                { key: "value", label: "Deger" },
+                { key: "label", label: "Etiket" }
+              ]}
+            />
+          </Section>
+
+          <Section title="Stats">
+            <ObjectListField
+              label="Istatistikler"
+              items={home.stats.items}
+              onChange={(items) => updateField("stats.items", items)}
+              emptyItem={{ icon: "clock", value: 0, suffix: "", label: "", color: "" }}
+              fields={[
+                { key: "icon", label: "Ikon Anahtari" },
+                { key: "value", label: "Deger", type: "number" },
+                { key: "suffix", label: "Ek (%, +)" },
+                { key: "label", label: "Etiket" },
+                { key: "color", label: "Renk Sinifi" }
+              ]}
+            />
+          </Section>
+
+          <Section title="Problemler">
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Baslik"
+                value={home.problems.title}
+                onChange={(value) => updateField("problems.title", value)}
+              />
+              <TextField
+                label="Vurgu"
+                value={home.problems.highlight}
+                onChange={(value) => updateField("problems.highlight", value)}
+              />
+            </div>
+            <TextAreaField
+              label="Aciklama"
+              value={home.problems.description}
+              onChange={(value) => updateField("problems.description", value)}
+              rows={3}
+            />
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="CTA Etiket"
+                value={home.problems.cta.label}
+                onChange={(value) => updateField("problems.cta.label", value)}
+              />
+              <TextField
+                label="CTA Link"
+                value={home.problems.cta.href}
+                onChange={(value) => updateField("problems.cta.href", value)}
+              />
+            </div>
+            <ObjectListField
+              label="Problem Kartlari"
+              items={home.problems.items}
+              onChange={(items) => updateField("problems.items", items)}
+              emptyItem={{ title: "", description: "", icon: "eye" }}
+              fields={[
+                { key: "title", label: "Baslik" },
+                { key: "description", label: "Aciklama", type: "textarea" },
+                { key: "icon", label: "Ikon Anahtari" }
+              ]}
+            />
+          </Section>
+
+          <Section title="Hizmetler">
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Baslik"
+                value={home.services.title}
+                onChange={(value) => updateField("services.title", value)}
+              />
+              <TextField
+                label="Vurgu"
+                value={home.services.highlight}
+                onChange={(value) => updateField("services.highlight", value)}
+              />
+              <TextAreaField
+                label="Aciklama"
+                value={home.services.description}
+                onChange={(value) => updateField("services.description", value)}
+                rows={2}
+              />
+              <TextField
+                label="Cocuk Etiketi"
+                value={home.services.childrenLabel}
+                onChange={(value) => updateField("services.childrenLabel", value)}
+              />
+              <TextField
+                label="Yetiskin Etiketi"
+                value={home.services.adultsLabel}
+                onChange={(value) => updateField("services.adultsLabel", value)}
+              />
+            </div>
+          </Section>
+
+          <Section title="Terapi Bolumu">
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Baslik"
+                value={home.therapy.title}
+                onChange={(value) => updateField("therapy.title", value)}
+              />
+              <TextField
+                label="Vurgu"
+                value={home.therapy.highlight}
+                onChange={(value) => updateField("therapy.highlight", value)}
+              />
+            </div>
+            <TextAreaField
+              label="Aciklama"
+              value={home.therapy.description}
+              onChange={(value) => updateField("therapy.description", value)}
+            />
+            <StringListField
+              label="Adimlar"
+              value={home.therapy.steps}
+              onChange={(value) => updateField("therapy.steps", value)}
+            />
+            <ObjectListField
+              label="Galeri"
+              items={home.therapy.gallery}
+              onChange={(items) => updateField("therapy.gallery", items)}
+              emptyItem={{ src: "", title: "" }}
+              fields={[
+                { key: "src", label: "Gorsel URL" },
+                { key: "title", label: "Baslik" }
+              ]}
+            />
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="CTA Etiket"
+                value={home.therapy.cta.label}
+                onChange={(value) => updateField("therapy.cta.label", value)}
+              />
+              <TextField
+                label="CTA Link"
+                value={home.therapy.cta.href}
+                onChange={(value) => updateField("therapy.cta.href", value)}
+              />
+            </div>
+          </Section>
+
+          <Section title="Hakkımda Onizleme">
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Isim"
+                value={home.aboutPreview.name}
+                onChange={(value) => updateField("aboutPreview.name", value)}
+              />
+              <TextField
+                label="Vurgu"
+                value={home.aboutPreview.highlight}
+                onChange={(value) => updateField("aboutPreview.highlight", value)}
+              />
+              <TextField
+                label="Unvan"
+                value={home.aboutPreview.title}
+                onChange={(value) => updateField("aboutPreview.title", value)}
+              />
+              <TextField
+                label="Deneyim Deger"
+                value={home.aboutPreview.experienceValue}
+                onChange={(value) => updateField("aboutPreview.experienceValue", value)}
+              />
+              <TextField
+                label="Deneyim Etiket"
+                value={home.aboutPreview.experienceLabel}
+                onChange={(value) => updateField("aboutPreview.experienceLabel", value)}
+              />
+            </div>
+            <TextAreaField
+              label="Alinti"
+              value={home.aboutPreview.quote}
+              onChange={(value) => updateField("aboutPreview.quote", value)}
+              rows={3}
+            />
+            <ObjectListField
+              label="Yetkinlikler"
+              items={home.aboutPreview.credentials}
+              onChange={(items) => updateField("aboutPreview.credentials", items)}
+              emptyItem={{ title: "", subtitle: "", icon: "" }}
+              fields={[
+                { key: "title", label: "Baslik" },
+                { key: "subtitle", label: "Alt Baslik" },
+                { key: "icon", label: "Ikon Anahtari" }
+              ]}
+            />
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Gorsel URL"
+                value={home.aboutPreview.image.src}
+                onChange={(value) => updateField("aboutPreview.image.src", value)}
+              />
+              <TextField
+                label="Gorsel Alt"
+                value={home.aboutPreview.image.alt}
+                onChange={(value) => updateField("aboutPreview.image.alt", value)}
+              />
+            </div>
+          </Section>
+
+          <Section title="AI CTA">
+            <TextField
+              label="Baslik"
+              value={home.aiCta.title}
+              onChange={(value) => updateField("aiCta.title", value)}
+            />
+            <TextAreaField
+              label="Aciklama"
+              value={home.aiCta.description}
+              onChange={(value) => updateField("aiCta.description", value)}
+              rows={3}
+            />
+            <ObjectListField
+              label="Özellikler"
+              items={home.aiCta.features}
+              onChange={(items) => updateField("aiCta.features", items)}
+              emptyItem={{ text: "", icon: "" }}
+              fields={[
+                { key: "text", label: "Metin" },
+                { key: "icon", label: "Ikon Anahtari" }
+              ]}
+            />
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Buton Etiket"
+                value={home.aiCta.buttonLabel}
+                onChange={(value) => updateField("aiCta.buttonLabel", value)}
+              />
+              <TextField
+                label="Buton Link"
+                value={home.aiCta.buttonHref}
+                onChange={(value) => updateField("aiCta.buttonHref", value)}
+              />
+            </div>
+            <TextField
+              label="Dipnot"
+              value={home.aiCta.footnote}
+              onChange={(value) => updateField("aiCta.footnote", value)}
+            />
+          </Section>
+
+          <Section title="Yorumlar">
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Baslik"
+                value={home.testimonials.title}
+                onChange={(value) => updateField("testimonials.title", value)}
+              />
+              <TextField
+                label="Vurgu"
+                value={home.testimonials.highlight}
+                onChange={(value) => updateField("testimonials.highlight", value)}
+              />
+            </div>
+            <TextAreaField
+              label="Aciklama"
+              value={home.testimonials.description}
+              onChange={(value) => updateField("testimonials.description", value)}
+              rows={2}
+            />
+            <ObjectListField
+              label="Yorum Kartlari"
+              items={home.testimonials.items}
+              onChange={(items) => updateField("testimonials.items", items)}
+              emptyItem={{
+                content: "",
+                author: "",
+                relation: "",
+                location: "",
+                date: "",
+                rating: 5,
+                serviceType: ""
+              }}
+              fields={[
+                { key: "content", label: "Icerik", type: "textarea" },
+                { key: "author", label: "Yazar" },
+                { key: "relation", label: "Iliski" },
+                { key: "location", label: "Konum" },
+                { key: "date", label: "Tarih" },
+                { key: "rating", label: "Puan", type: "number" },
+                { key: "serviceType", label: "Hizmet Tipi" }
+              ]}
+            />
+            <TextField
+              label="Video Baslik"
+              value={home.testimonials.videoTitle}
+              onChange={(value) => updateField("testimonials.videoTitle", value)}
+            />
+            <ObjectListField
+              label="Video Kartlari"
+              items={home.testimonials.videos}
+              onChange={(items) => updateField("testimonials.videos", items)}
+              emptyItem={{ title: "", thumbnail: "", videoUrl: "" }}
+              fields={[
+                { key: "title", label: "Baslik" },
+                { key: "thumbnail", label: "Kapak URL" },
+                { key: "videoUrl", label: "Video URL" }
+              ]}
+            />
+          </Section>
+        </div>
+      )}
+      {contentKey === "about" && (
+        <div className="space-y-6">
+          <Section title="Hero">
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Isim"
+                value={about.hero.name}
+                onChange={(value) => updateField("hero.name", value)}
+              />
+              <TextField
+                label="Vurgu"
+                value={about.hero.highlight}
+                onChange={(value) => updateField("hero.highlight", value)}
+              />
+              <TextField
+                label="Unvan"
+                value={about.hero.title}
+                onChange={(value) => updateField("hero.title", value)}
+              />
+            </div>
+            <StringListField
+              label="Paragraflar"
+              value={about.hero.paragraphs}
+              onChange={(value) => updateField("hero.paragraphs", value)}
+            />
+            <TextAreaField
+              label="Alinti"
+              value={about.hero.quote}
+              onChange={(value) => updateField("hero.quote", value)}
+            />
+            <ObjectListField
+              label="Statlar"
+              items={about.hero.stats}
+              onChange={(items) => updateField("hero.stats", items)}
+              emptyItem={{ value: "", label: "" }}
+              fields={[
+                { key: "value", label: "Deger" },
+                { key: "label", label: "Etiket" }
+              ]}
+            />
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Gorsel URL"
+                value={about.hero.image.src}
+                onChange={(value) => updateField("hero.image.src", value)}
+              />
+              <TextField
+                label="Gorsel Alt"
+                value={about.hero.image.alt}
+                onChange={(value) => updateField("hero.image.alt", value)}
+              />
+            </div>
+          </Section>
+
+          <Section title="Kariyer Timeline">
+            <ObjectListField
+              label="Timeline"
+              items={about.timeline}
+              onChange={(items) => updateField("timeline", items)}
+              emptyItem={{ year: "", title: "", description: "", icon: "" }}
+              fields={[
+                { key: "year", label: "Yil" },
+                { key: "title", label: "Baslik" },
+                { key: "description", label: "Aciklama", type: "textarea" },
+                { key: "icon", label: "Ikon Anahtari" }
+              ]}
+            />
+          </Section>
+
+          <Section title="Sertifikalar">
+            <StringListField
+              label="Sertifika Listesi"
+              value={about.certifications}
+              onChange={(value) => updateField("certifications", value)}
+            />
+          </Section>
+
+          <Section title="Degerler">
+            <ObjectListField
+              label="Deger Kartlari"
+              items={about.values}
+              onChange={(items) => updateField("values", items)}
+              emptyItem={{ title: "", description: "", icon: "" }}
+              fields={[
+                { key: "title", label: "Baslik" },
+                { key: "description", label: "Aciklama", type: "textarea" },
+                { key: "icon", label: "Ikon Anahtari" }
+              ]}
+            />
+          </Section>
+        </div>
+      )}
+
+      {contentKey === "services-page" && (
+        <Section title="Hizmetler Sayfasi">
+          <TextField
+            label="Baslik"
+            value={servicesPage.title}
+            onChange={(value) => updateField("title", value)}
+          />
+          <TextAreaField
+            label="Aciklama"
+            value={servicesPage.description}
+            onChange={(value) => updateField("description", value)}
+            rows={3}
+          />
+          <TextField
+            label="Cocuk Baslik"
+            value={servicesPage.childrenTitle}
+            onChange={(value) => updateField("childrenTitle", value)}
+          />
+          <TextAreaField
+            label="Cocuk Aciklama"
+            value={servicesPage.childrenDescription}
+            onChange={(value) => updateField("childrenDescription", value)}
+            rows={2}
+          />
+          <TextField
+            label="Yetiskin Baslik"
+            value={servicesPage.adultsTitle}
+            onChange={(value) => updateField("adultsTitle", value)}
+          />
+          <TextAreaField
+            label="Yetiskin Aciklama"
+            value={servicesPage.adultsDescription}
+            onChange={(value) => updateField("adultsDescription", value)}
+            rows={2}
+          />
+        </Section>
+      )}
+
+      {contentKey === "booking" && (
+        <Section title="Randevu">
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextField
+              label="Baslik"
+              value={booking.title}
+              onChange={(value) => updateField("title", value)}
+            />
+            <TextField
+              label="Vurgu"
+              value={booking.highlight}
+              onChange={(value) => updateField("highlight", value)}
+            />
+          </div>
+          <TextAreaField
+            label="Aciklama"
+            value={booking.description}
+            onChange={(value) => updateField("description", value)}
+            rows={2}
+          />
+          <ObjectListField
+            label="Özellikler"
+            items={booking.features}
+            onChange={(items) => updateField("features", items)}
+            emptyItem={{ text: "", icon: "" }}
+            fields={[
+              { key: "text", label: "Metin" },
+              { key: "icon", label: "Ikon Anahtari" }
+            ]}
+          />
+          <TextField
+            label="İletişim Metni"
+            value={booking.contactPrompt}
+            onChange={(value) => updateField("contactPrompt", value)}
+          />
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextField
+              label="Telefon CTA"
+              value={booking.phoneCtaLabel}
+              onChange={(value) => updateField("phoneCtaLabel", value)}
+            />
+            <TextField
+              label="WhatsApp CTA"
+              value={booking.whatsappCtaLabel}
+              onChange={(value) => updateField("whatsappCtaLabel", value)}
+            />
+          </div>
+        </Section>
+      )}
+
+      {contentKey === "assessment" && (
+        <Section title="Degerlendirme">
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextField
+              label="Badge"
+              value={assessment.badge}
+              onChange={(value) => updateField("badge", value)}
+            />
+            <TextField
+              label="Baslik"
+              value={assessment.title}
+              onChange={(value) => updateField("title", value)}
+            />
+            <TextField
+              label="Vurgu"
+              value={assessment.highlight}
+              onChange={(value) => updateField("highlight", value)}
+            />
+          </div>
+          <TextAreaField
+            label="Aciklama"
+            value={assessment.description}
+            onChange={(value) => updateField("description", value)}
+            rows={3}
+          />
+          <ObjectListField
+            label="Özellikler"
+            items={assessment.features}
+            onChange={(items) => updateField("features", items)}
+            emptyItem={{ text: "", icon: "" }}
+            fields={[
+              { key: "text", label: "Metin" },
+              { key: "icon", label: "Ikon Anahtari" }
+            ]}
+          />
+        </Section>
+      )}
+
+      {contentKey === "therapy" && (
+        <div className="space-y-6">
+          <Section title="Hero">
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Badge"
+                value={therapy.hero.badge}
+                onChange={(value) => updateField("hero.badge", value)}
+              />
+              <TextField
+                label="Baslik"
+                value={therapy.hero.title}
+                onChange={(value) => updateField("hero.title", value)}
+              />
+              <TextField
+                label="Vurgu"
+                value={therapy.hero.highlight}
+                onChange={(value) => updateField("hero.highlight", value)}
+              />
+            </div>
+            <TextAreaField
+              label="Aciklama"
+              value={therapy.hero.description}
+              onChange={(value) => updateField("hero.description", value)}
+              rows={3}
+            />
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="CTA 1 Etiket"
+                value={therapy.hero.ctaPrimaryLabel}
+                onChange={(value) => updateField("hero.ctaPrimaryLabel", value)}
+              />
+              <TextField
+                label="CTA 1 Link"
+                value={therapy.hero.ctaPrimaryHref}
+                onChange={(value) => updateField("hero.ctaPrimaryHref", value)}
+              />
+              <TextField
+                label="CTA 2 Etiket"
+                value={therapy.hero.ctaSecondaryLabel}
+                onChange={(value) => updateField("hero.ctaSecondaryLabel", value)}
+              />
+              <TextField
+                label="CTA 2 Link"
+                value={therapy.hero.ctaSecondaryHref}
+                onChange={(value) => updateField("hero.ctaSecondaryHref", value)}
+              />
+            </div>
+          </Section>
+
+          <Section title="Egitim Rotasi">
+            <TextField
+              label="Ozet Baslik"
+              value={therapy.routeSummaryTitle}
+              onChange={(value) => updateField("routeSummaryTitle", value)}
+            />
+            <ObjectListField
+              label="Adimlar"
+              items={therapy.routeSteps}
+              onChange={(items) => updateField("routeSteps", items)}
+              emptyItem={{ title: "", description: "" }}
+              fields={[
+                { key: "title", label: "Baslik" },
+                { key: "description", label: "Aciklama", type: "textarea" }
+              ]}
+            />
+          </Section>
+
+          <Section title="Setler">
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Baslik"
+                value={therapy.toolsTitle}
+                onChange={(value) => updateField("toolsTitle", value)}
+              />
+              <TextAreaField
+                label="Aciklama"
+                value={therapy.toolsDescription}
+                onChange={(value) => updateField("toolsDescription", value)}
+                rows={2}
+              />
+            </div>
+            <ObjectListField
+              label="Set Kartlari"
+              items={therapy.toolSets}
+              onChange={(items) => updateField("toolSets", items)}
+              emptyItem={{ title: "", description: "", icon: "" }}
+              fields={[
+                { key: "title", label: "Baslik" },
+                { key: "description", label: "Aciklama", type: "textarea" },
+                { key: "icon", label: "Ikon Anahtari" }
+              ]}
+            />
+          </Section>
+
+          <Section title="Galeri">
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Baslik"
+                value={therapy.galleryTitle}
+                onChange={(value) => updateField("galleryTitle", value)}
+              />
+              <TextAreaField
+                label="Aciklama"
+                value={therapy.galleryDescription}
+                onChange={(value) => updateField("galleryDescription", value)}
+                rows={2}
+              />
+            </div>
+            <ObjectListField
+              label="Galeri Gorselleri"
+              items={therapy.gallery}
+              onChange={(items) => updateField("gallery", items)}
+              emptyItem={{ src: "", label: "" }}
+              fields={[
+                { key: "src", label: "Gorsel URL" },
+                { key: "label", label: "Etiket" }
+              ]}
+            />
+          </Section>
+        </div>
+      )}
+
+      {contentKey === "contact" && (
+        <Section title="İletişim">
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextField
+              label="Hero Badge"
+              value={contact.heroBadge}
+              onChange={(value) => updateField("heroBadge", value)}
+            />
+            <TextField
+              label="Hero Baslik"
+              value={contact.heroTitle}
+              onChange={(value) => updateField("heroTitle", value)}
+            />
+            <TextField
+              label="Hero Vurgu"
+              value={contact.heroHighlight}
+              onChange={(value) => updateField("heroHighlight", value)}
+            />
+          </div>
+          <TextAreaField
+            label="Hero Aciklama"
+            value={contact.heroDescription}
+            onChange={(value) => updateField("heroDescription", value)}
+            rows={3}
+          />
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextField
+              label="Hero CTA 1"
+              value={contact.heroPrimaryCta}
+              onChange={(value) => updateField("heroPrimaryCta", value)}
+            />
+            <TextField
+              label="Hero CTA 2"
+              value={contact.heroSecondaryCta}
+              onChange={(value) => updateField("heroSecondaryCta", value)}
+            />
+          </div>
+          <TextField
+            label="Randevu Baslik"
+            value={contact.appointmentTitle}
+            onChange={(value) => updateField("appointmentTitle", value)}
+          />
+          <TextAreaField
+            label="Randevu Aciklama"
+            value={contact.appointmentDescription}
+            onChange={(value) => updateField("appointmentDescription", value)}
+            rows={2}
+          />
+          <StringListField
+            label="Randevu Özellikleri"
+            value={contact.appointmentFeatures}
+            onChange={(value) => updateField("appointmentFeatures", value)}
+          />
+          <TextField
+            label="Mesaj Baslik"
+            value={contact.messageTitle}
+            onChange={(value) => updateField("messageTitle", value)}
+          />
+          <TextAreaField
+            label="Mesaj Aciklama"
+            value={contact.messageDescription}
+            onChange={(value) => updateField("messageDescription", value)}
+            rows={2}
+          />
+          <TextField
+            label="Bilgi Baslik"
+            value={contact.infoTitle}
+            onChange={(value) => updateField("infoTitle", value)}
+          />
+          <TextField
+            label="Hizli İletişim Baslik"
+            value={contact.quickContactTitle}
+            onChange={(value) => updateField("quickContactTitle", value)}
+          />
+          <TextAreaField
+            label="Hizli İletişim Aciklama"
+            value={contact.quickContactDescription}
+            onChange={(value) => updateField("quickContactDescription", value)}
+            rows={2}
+          />
+          <TextField
+            label="Konum Baslik"
+            value={contact.locationTitle}
+            onChange={(value) => updateField("locationTitle", value)}
+          />
+        </Section>
+      )}
+
+      {contentKey === "blog" && (
+        <div className="space-y-6">
+          <Section title="Blog">
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Baslik"
+                value={blog.title}
+                onChange={(value) => updateField("title", value)}
+              />
+              <TextField
+                label="Vurgu"
+                value={blog.highlight}
+                onChange={(value) => updateField("highlight", value)}
+              />
+            </div>
+            <TextAreaField
+              label="Aciklama"
+              value={blog.description}
+              onChange={(value) => updateField("description", value)}
+              rows={2}
+            />
+            <StringListField
+              label="Kategoriler"
+              value={blog.categories}
+              onChange={(value) => updateField("categories", value)}
+            />
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Featured Baslik"
+                value={blog.featuredTitle}
+                onChange={(value) => updateField("featuredTitle", value)}
+              />
+              <TextAreaField
+                label="Featured Aciklama"
+                value={blog.featuredDescription}
+                onChange={(value) => updateField("featuredDescription", value)}
+                rows={2}
+              />
+            </div>
+            <label className="block space-y-1 text-sm">
+              <span className={labelClasses}>Featured Articles (JSON)</span>
+              <textarea
+                rows={10}
+                className={`${inputClasses} font-mono text-xs`}
+                value={featuredJson}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setFeaturedJson(value);
+                  try {
+                    JSON.parse(value || "[]");
+                    setFeaturedError(null);
+                  } catch (error: any) {
+                    setFeaturedError("JSON format hatali.");
+                  }
+                }}
+              />
+              {featuredError && (
+                <p className="text-xs text-red-600">{featuredError}</p>
+              )}
+            </label>
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Bulten Baslik"
+                value={blog.newsletterTitle}
+                onChange={(value) => updateField("newsletterTitle", value)}
+              />
+              <TextAreaField
+                label="Bulten Aciklama"
+                value={blog.newsletterDescription}
+                onChange={(value) => updateField("newsletterDescription", value)}
+                rows={2}
+              />
+              <TextField
+                label="Bulten Placeholder"
+                value={blog.newsletterPlaceholder}
+                onChange={(value) => updateField("newsletterPlaceholder", value)}
+              />
+              <TextField
+                label="Bulten Buton"
+                value={blog.newsletterButton}
+                onChange={(value) => updateField("newsletterButton", value)}
+              />
+            </div>
+            <TextAreaField
+              label="Aciklama Notu"
+              value={blog.disclaimer}
+              onChange={(value) => updateField("disclaimer", value)}
+              rows={2}
+            />
+          </Section>
+        </div>
+      )}
+    </div>
+  );
+}
