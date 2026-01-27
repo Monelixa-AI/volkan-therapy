@@ -83,9 +83,9 @@ export const DEFAULT_SITE_INFO: SiteInfoSettings = {
 
 export const DEFAULT_EMAIL_SETTINGS: EmailSettings = {
   fromName: "Volkan Özcihan",
-  fromEmail: "randevu@volkanozcihan.com",
-  replyTo: "info@volkanozcihan.com",
-  notificationEmail: "info@volkanozcihan.com",
+  fromEmail: "onboarding@resend.dev",
+  replyTo: "socif@yahoo.com",
+  notificationEmail: "socif@yahoo.com",
   useResendOverride: false,
   resendApiKeyEncrypted: null,
   enableBookingConfirmation: true,
