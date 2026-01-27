@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { BlogPost } from "@prisma/client";
 import { prisma } from "@/lib/db";
 
 export default async function AdminBlogPage() {
@@ -23,7 +22,7 @@ export default async function AdminBlogPage() {
       </div>
       <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="divide-y divide-slate-200">
-          {posts.map((post: BlogPost) => (
+          {posts.map((post) => (
             <div key={post.id} className="flex items-center justify-between px-6 py-4">
               <div>
                 <p className="font-medium text-slate-900">{post.title}</p>
