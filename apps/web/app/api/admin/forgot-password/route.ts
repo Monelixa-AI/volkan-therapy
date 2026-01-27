@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
+      return NextResponse.json({ error: "Gecersiz e-posta adresi." }, { status: 400 });
     }
     return NextResponse.json({ error: "Islem basarisiz." }, { status: 500 });
   }
