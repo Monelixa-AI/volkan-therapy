@@ -1,12 +1,13 @@
 import twilio from "twilio";
 
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
-
-const ADMIN_WHATSAPP = process.env.ADMIN_WHATSAPP_NUMBER || "";
-const TWILIO_WHATSAPP = process.env.TWILIO_WHATSAPP_NUMBER || "";
+function getClient() {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  if (!accountSid || !authToken) {
+    return null;
+  }
+  return twilio(accountSid, authToken);
+}
 
 interface WhatsAppMessage {
   to?: string;
@@ -15,11 +16,19 @@ interface WhatsAppMessage {
 
 export async function sendWhatsAppNotification({ to, message }: WhatsAppMessage) {
   try {
-    const recipient = to || ADMIN_WHATSAPP;
+    const client = getClient();
+    if (!client) {
+      console.warn("Twilio credentials not configured");
+      return { success: false, error: "Twilio not configured" };
+    }
+
+    const adminWhatsApp = process.env.ADMIN_WHATSAPP_NUMBER || "";
+    const twilioWhatsApp = process.env.TWILIO_WHATSAPP_NUMBER || "";
+    const recipient = to || adminWhatsApp;
 
     await client.messages.create({
       body: message,
-      from: `whatsapp:${TWILIO_WHATSAPP}`,
+      from: `whatsapp:${twilioWhatsApp}`,
       to: `whatsapp:${recipient}`
     });
     return { success: true };

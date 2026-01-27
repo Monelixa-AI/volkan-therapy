@@ -42,7 +42,7 @@ function ServiceCard({ title, subtitle, description, highlights, review, slug }:
             <div className="bg-primary-50 border border-primary-100 rounded-xl p-5">
               <p className="text-xs text-gray-500 mb-2">Mutlu Aile Yorumu</p>
               <div className="text-yellow-500 text-sm mb-2">★★★★★</div>
-              <p className="text-sm text-gray-700 italic">"{review.text}"</p>
+              <p className="text-sm text-gray-700 italic">&ldquo;{review.text}&rdquo;</p>
               <p className="text-xs text-gray-500 mt-3">
                 {review.author} • {review.relation} • {review.location}
               </p>

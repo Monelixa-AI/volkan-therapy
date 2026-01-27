@@ -71,7 +71,7 @@ export async function sendBookingConfirmation(data: BookingConfirmationData) {
     await client.resend.emails.send({
       from: client.from,
       to: data.to,
-      replyTo: client.replyTo,
+      reply_to: client.replyTo,
       subject,
       html: `<p>${body}</p>`
     });
@@ -97,7 +97,7 @@ export async function sendContactFormNotification(data: {
     await client.resend.emails.send({
       from: client.from,
       to: settings.notificationEmail,
-      replyTo: client.replyTo || data.email,
+      reply_to: client.replyTo || data.email,
       subject: `Yeni iletisim formu: ${data.name}`,
       html: `
         <h2>Yeni iletisim formu mesaji</h2>
@@ -137,7 +137,7 @@ export async function sendBookingReminderEmail(data: BookingConfirmationData) {
     await client.resend.emails.send({
       from: client.from,
       to: data.to,
-      replyTo: client.replyTo,
+      reply_to: client.replyTo,
       subject,
       html: `<p>${body}</p>`
     });
@@ -170,7 +170,7 @@ export async function sendBookingThankYouEmail(data: BookingConfirmationData) {
     await client.resend.emails.send({
       from: client.from,
       to: data.to,
-      replyTo: client.replyTo,
+      reply_to: client.replyTo,
       subject,
       html: `<p>${body}</p>`
     });
@@ -190,7 +190,7 @@ export async function sendTestEmail(to: string, message: string) {
     await client.resend.emails.send({
       from: client.from,
       to,
-      replyTo: client.replyTo,
+      reply_to: client.replyTo,
       subject: "Test e-postasi",
       html: `<p>${message}</p>`
     });
@@ -210,7 +210,7 @@ export async function sendAdminPasswordResetEmail(to: string, resetUrl: string) 
     await client.resend.emails.send({
       from: client.from,
       to,
-      replyTo: client.replyTo,
+      reply_to: client.replyTo,
       subject: "Sifre sifirlama baglantisi",
       html: `
         <p>Sifrenizi sifirlamak icin asagidaki baglantiyi kullanin:</p>

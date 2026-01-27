@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { getEmailSettings, getSiteInfo } from "@/lib/site-settings";
 import type { Booking } from "@prisma/client";
+import { ReminderType } from "@prisma/client";
 
 function buildDateTime(date: Date, time: string, offset: string) {
   const day = date.toISOString().slice(0, 10);
@@ -33,7 +34,7 @@ export async function scheduleBookingReminders(booking: Booking) {
       if (sendAt.getTime() > now) {
         reminders.push({
           bookingId: booking.id,
-          reminderType: "REMINDER",
+          reminderType: ReminderType.REMINDER,
           offsetMinutes: offset,
           sendAt
         });
@@ -48,7 +49,7 @@ export async function scheduleBookingReminders(booking: Booking) {
     if (sendAt.getTime() > now) {
       reminders.push({
         bookingId: booking.id,
-        reminderType: "THANK_YOU",
+        reminderType: ReminderType.THANK_YOU,
         offsetMinutes: settings.thankYouOffsetMinutes,
         sendAt
       });

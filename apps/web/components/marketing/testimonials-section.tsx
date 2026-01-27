@@ -64,7 +64,7 @@ export function TestimonialsSection({ content }: TestimonialsSectionProps) {
                       ))}
                     </div>
                     <blockquote className="text-xl md:text-2xl text-gray-700 text-center mb-8 font-display italic">
-                      "{current.content}"
+                      &ldquo;{current.content}&rdquo;
                     </blockquote>
                     <div className="text-center">
                       <p className="font-semibold text-gray-900">

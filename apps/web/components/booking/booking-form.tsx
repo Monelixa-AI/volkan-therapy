@@ -466,7 +466,7 @@ export function BookingForm() {
                   <a href="/kvkk" className="text-primary-500 underline">
                     KVKK Aydınlatma Metni
                   </a>
-                  'ni okudum ve kabul ediyorum. Kişisel verilerimin işlenmesine
+                  &apos;ni okudum ve kabul ediyorum. Kişisel verilerimin işlenmesine
                   onay veriyorum.
                 </label>
               </div>

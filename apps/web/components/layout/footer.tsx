@@ -169,7 +169,7 @@ export function Footer({ siteInfo, legalPages }: FooterProps) {
                 />
                 <span>{siteInfo.poweredBy.label}</span>
               </a>
-              <p>Türkiye'de sevgiyle yapıldı</p>
+              <p>Türkiye&apos;de sevgiyle yapıldı</p>
             </div>
           </div>
         </div>

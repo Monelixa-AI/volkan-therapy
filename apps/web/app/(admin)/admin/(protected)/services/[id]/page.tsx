@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { Prisma } from "@prisma/client";
+import { Prisma, ServiceCategory } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/admin-auth";
 
@@ -76,7 +76,7 @@ async function updateService(formData: FormData) {
       longDescription: String(formData.get("longDescription") || "").trim() || null,
       duration: Number(formData.get("duration") || 60),
       price: new Prisma.Decimal(String(formData.get("price") || "0")),
-      category: String(formData.get("category") || "CHILD_THERAPY"),
+      category: (formData.get("category") || "CHILD_THERAPY") as ServiceCategory,
       icon: String(formData.get("icon") || "").trim() || null,
       image: String(formData.get("image") || "").trim() || null,
       order: Number(formData.get("order") || 0),

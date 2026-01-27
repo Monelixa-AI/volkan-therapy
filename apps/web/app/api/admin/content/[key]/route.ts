@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getContentEntry } from "@/lib/content";
@@ -73,7 +74,7 @@ export async function PUT(
     await prisma.contentRevision.create({
       data: {
         contentId: existing.id,
-        data: existing.data,
+        data: existing.data as Prisma.InputJsonValue,
         createdById: admin.id
       }
     });
