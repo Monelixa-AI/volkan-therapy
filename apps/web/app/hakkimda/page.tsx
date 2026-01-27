@@ -4,11 +4,11 @@ import {
   Award,
   Building,
   Heart,
-import { IMAGE_DISCLAIMER } from "@/lib/ui-copy";
   BookOpen,
   Users,
   User
 } from "lucide-react";
+import { IMAGE_DISCLAIMER } from "@/lib/ui-copy";
 import { getAboutContent } from "@/lib/content";
 
 export const metadata: Metadata = {
