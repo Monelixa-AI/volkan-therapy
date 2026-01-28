@@ -66,7 +66,7 @@ export type ChatbotSettings = {
 
 export const DEFAULT_CHATBOT_SETTINGS: ChatbotSettings = {
   enabled: true,
-  model: "meta-llama/llama-3.2-3b-instruct:free",
+  model: "deepseek/deepseek-r1-0528:free",
   systemPrompt: `Sen Volkan Özcihan'ın terapi kliniğinin dijital asistanısın. Adın "Volkan Terapi Asistanı".
 
 GÖREV: Ailelere çocuk gelişimi, terapi hizmetleri ve randevu konularında yardımcı olmak.

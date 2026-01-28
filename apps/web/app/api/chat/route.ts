@@ -44,15 +44,18 @@ export async function POST(request: Request) {
       baseURL: "https://openrouter.ai/api/v1"
     });
 
-    const freeModels = [
+    const fallbackModels = [
       settings.model,
-      "google/gemma-2-9b-it:free",
-      "microsoft/phi-3-mini-128k-instruct:free",
-      "google/gemini-2.0-flash-exp:free"
+      "deepseek/deepseek-r1-0528:free",
+      "google/gemini-2.5-flash-preview:free",
+      "meta-llama/llama-4-maverick:free",
+      "google/gemma-3-27b-it:free",
+      "microsoft/phi-4-reasoning-plus:free",
+      "qwen/qwen3-235b-a22b:free"
     ];
 
     // Deduplicate models in case settings.model is already in the list
-    const uniqueModels = [...new Set(freeModels)];
+    const uniqueModels = [...new Set(fallbackModels)];
 
     let lastError: any;
     for (const model of uniqueModels) {

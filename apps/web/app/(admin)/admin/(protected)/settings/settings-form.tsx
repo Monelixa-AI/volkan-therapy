@@ -741,10 +741,12 @@ export function AdminSettingsForm({
                 setChatbotSettings({ ...chatbotSettings, model: event.target.value })
               }
             >
-              <option value="meta-llama/llama-3.2-3b-instruct:free">Llama 3.2 3B (Free)</option>
-              <option value="google/gemma-2-9b-it:free">Gemma 2 9B (Free)</option>
-              <option value="microsoft/phi-3-mini-128k-instruct:free">Phi-3 Mini (Free)</option>
-              <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash (Free)</option>
+              <option value="deepseek/deepseek-r1-0528:free">DeepSeek R1 (Free)</option>
+              <option value="google/gemini-2.5-flash-preview:free">Gemini 2.5 Flash (Free)</option>
+              <option value="meta-llama/llama-4-maverick:free">Llama 4 Maverick (Free)</option>
+              <option value="google/gemma-3-27b-it:free">Gemma 3 27B (Free)</option>
+              <option value="microsoft/phi-4-reasoning-plus:free">Phi-4 Reasoning (Free)</option>
+              <option value="qwen/qwen3-235b-a22b:free">Qwen 3 235B (Free)</option>
             </select>
           </label>
           <label className="text-sm">
