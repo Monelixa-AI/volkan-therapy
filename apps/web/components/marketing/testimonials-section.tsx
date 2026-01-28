@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Quote, Star, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, Quote, Star, Play, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { HomeContent } from "@/lib/content-defaults";
 
@@ -14,6 +14,7 @@ export function TestimonialsSection({ content }: TestimonialsSectionProps) {
   const testimonials = content.items;
   const videos = content.videos;
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [activeVideo, setActiveVideo] = useState<string | null>(null);
 
   const total = testimonials.length;
   const safeIndex = total === 0 ? 0 : currentIndex % total;
@@ -122,47 +123,109 @@ export function TestimonialsSection({ content }: TestimonialsSectionProps) {
           </h3>
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {videos.map((video, index) => {
-              const Wrapper = video.videoUrl ? "a" : "div";
+              const isLocalVideo = video.videoUrl && (video.videoUrl.startsWith("/") || video.videoUrl.endsWith(".mp4"));
+              const handleClick = () => {
+                if (isLocalVideo) {
+                  setActiveVideo(video.videoUrl);
+                }
+              };
+
               return (
                 <motion.div
                   key={`${video.title}-${index}`}
                   whileHover={{ scale: 1.05 }}
                   className="relative aspect-video rounded-xl overflow-hidden cursor-pointer group"
+                  onClick={isLocalVideo ? handleClick : undefined}
                 >
-                  <Wrapper
-                    {...(video.videoUrl
-                      ? {
-                          href: video.videoUrl,
-                          target: "_blank",
-                          rel: "noopener noreferrer"
-                        }
-                      : {})}
-                    className="absolute inset-0 block"
-                  >
-                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors z-10" />
-                    <div className="absolute inset-0 flex items-center justify-center z-20">
-                      <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Play className="w-8 h-8 text-primary-500 ml-1" />
+                  {!isLocalVideo && video.videoUrl ? (
+                    <a
+                      href={video.videoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute inset-0 block"
+                    >
+                      <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors z-10" />
+                      <div className="absolute inset-0 flex items-center justify-center z-20">
+                        <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <Play className="w-8 h-8 text-primary-500 ml-1" />
+                        </div>
                       </div>
-                    </div>
-                    {video.thumbnail ? (
-                      <img
-                        src={video.thumbnail}
-                        alt={video.title}
-                        className="absolute inset-0 h-full w-full object-cover"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary-400 to-primary-600" />
-                    )}
-                    <p className="absolute bottom-4 left-4 text-white font-medium z-20">
-                      {video.title}
-                    </p>
-                  </Wrapper>
+                      {video.thumbnail ? (
+                        <img
+                          src={video.thumbnail}
+                          alt={video.title}
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary-400 to-primary-600" />
+                      )}
+                      <p className="absolute bottom-4 left-4 text-white font-medium z-20">
+                        {video.title}
+                      </p>
+                    </a>
+                  ) : (
+                    <>
+                      <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors z-10" />
+                      <div className="absolute inset-0 flex items-center justify-center z-20">
+                        <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <Play className="w-8 h-8 text-primary-500 ml-1" />
+                        </div>
+                      </div>
+                      {video.thumbnail ? (
+                        <img
+                          src={video.thumbnail}
+                          alt={video.title}
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary-400 to-primary-600" />
+                      )}
+                      <p className="absolute bottom-4 left-4 text-white font-medium z-20">
+                        {video.title}
+                      </p>
+                    </>
+                  )}
                 </motion.div>
               );
             })}
           </div>
         </div>
+
+        {/* Video Modal */}
+        <AnimatePresence>
+          {activeVideo && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+              onClick={() => setActiveVideo(null)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative max-w-4xl w-full"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setActiveVideo(null)}
+                  className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+                >
+                  <X className="w-8 h-8" />
+                </button>
+                <video
+                  src={activeVideo}
+                  controls
+                  autoPlay
+                  className="w-full rounded-xl"
+                >
+                  Tarayıcınız video oynatmayı desteklemiyor.
+                </video>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );

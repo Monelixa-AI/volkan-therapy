@@ -362,7 +362,7 @@ export const DEFAULT_HOME_CONTENT: HomeContent = {
     ],
     videoTitle: "Video Hikayeler",
     videos: [
-      { title: "Efe'nin Hikayesi", thumbnail: "/images/testimonials/video-1.jpg", videoUrl: "" },
+      { title: "Efe'nin Hikayesi", thumbnail: "/images/testimonials/video-1.jpg", videoUrl: "/videos/efe-hikayesi.mp4" },
       { title: "Elif'in Başarısı", thumbnail: "/images/testimonials/video-2.jpg", videoUrl: "" },
       { title: "Yusuf'un Gelişimi", thumbnail: "/images/testimonials/video-3.jpg", videoUrl: "" }
     ]
