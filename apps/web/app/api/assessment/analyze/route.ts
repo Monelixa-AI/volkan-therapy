@@ -1,14 +1,41 @@
 import { NextResponse } from "next/server";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { OpenAI } from "openai";
 import { prisma } from "@/lib/db";
 
-// OpenRouter veya OpenAI kullan (fallback)
-const openai = new OpenAI({
-  apiKey: process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY || "sk-or-v1-demo",
-  baseURL: process.env.OPENROUTER_API_KEY
-    ? "https://openrouter.ai/api/v1"
-    : undefined
-});
+const systemPrompt =
+  "Sen pediatrik gelişim uzmanı bir asistansın. Ailelerin çocukları hakkında verdikleri bilgileri analiz ederek, duyusal bütünleme, dikkat eksikliği, otizm spektrum belirtileri ve öğrenme güçlükleri açısından değerlendirme yapıyorsun. ÖNEMLİ: Bu bir ön değerlendirmedir, kesin tanı değildir. Her zaman profesyonel değerlendirme öner. Yanıtlarını Türkçe ver ve ailelerle sıcak, anlayışlı bir dil kullan.";
+
+async function callGoogleAI(prompt: string): Promise<string> {
+  const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY!);
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+  const result = await model.generateContent([
+    { text: systemPrompt },
+    { text: prompt }
+  ]);
+
+  return result.response.text();
+}
+
+async function callOpenRouterAI(prompt: string): Promise<string> {
+  const openai = new OpenAI({
+    apiKey: process.env.OPENROUTER_API_KEY,
+    baseURL: "https://openrouter.ai/api/v1"
+  });
+
+  const completion = await openai.chat.completions.create({
+    model: "google/gemini-2.0-flash-exp:free",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: prompt }
+    ],
+    temperature: 0.7,
+    max_tokens: 2000
+  });
+
+  return completion.choices[0].message.content || "";
+}
 
 export async function POST(request: Request) {
   try {
@@ -28,30 +55,18 @@ export async function POST(request: Request) {
 
     const prompt = buildAnalysisPrompt(answers);
 
-    // OpenRouter ücretsiz model veya OpenAI
-    const modelName = process.env.OPENROUTER_API_KEY
-      ? "google/gemini-2.0-flash-exp:free" // Ücretsiz Gemini model
-      : "gpt-4-turbo-preview";
+    let aiResponse: string;
 
-    const completion = await openai.chat.completions.create({
-      model: modelName,
-      messages: [
-        {
-          role: "system",
-          content:
-            "Sen pediatrik gelişim uzmanı bir asistansın. Ailelerin çocukları hakkında verdikleri bilgileri analiz ederek, duyusal bütünleme, dikkat eksikliği, otizm spektrum belirtileri ve öğrenme güçlükleri açısından değerlendirme yapıyorsun. ÖNEMLİ: Bu bir ön değerlendirmedir, kesin tanı değildir. Her zaman profesyonel değerlendirme öner. Yanıtlarını Türkçe ver ve ailelerle sıcak, anlayışlı bir dil kullan."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 2000
-    });
+    // Google AI öncelikli, yoksa OpenRouter fallback
+    if (process.env.GOOGLE_AI_API_KEY) {
+      aiResponse = await callGoogleAI(prompt);
+    } else if (process.env.OPENROUTER_API_KEY) {
+      aiResponse = await callOpenRouterAI(prompt);
+    } else {
+      throw new Error("No AI API key configured");
+    }
 
-    const aiResponse = completion.choices[0].message.content;
-    const analysisResult = parseAIResponse(aiResponse || "");
+    const analysisResult = parseAIResponse(aiResponse);
 
     await prisma.assessment.update({
       where: { sessionId },
@@ -70,14 +85,13 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error("AI Analysis error:", error);
 
-    // Provide more specific error messages
     let errorMessage = "Analiz sırasında bir hata oluştu";
 
     if (error?.code === "ETIMEDOUT" || error?.code === "ECONNRESET") {
       errorMessage = "Baglanti zaman asimina ugradi. Lutfen tekrar deneyin.";
-    } else if (error?.status === 429) {
+    } else if (error?.status === 429 || error?.message?.includes("429")) {
       errorMessage = "Cok fazla istek gonderildi. Lutfen biraz bekleyip tekrar deneyin.";
-    } else if (error?.message?.includes("API key")) {
+    } else if (error?.message?.includes("API key") || error?.message?.includes("API_KEY")) {
       errorMessage = "AI servisi yapilandirma hatasi. Lutfen yoneticiye bildirin.";
     }
 
