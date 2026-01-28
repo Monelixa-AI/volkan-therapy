@@ -67,10 +67,22 @@ export async function POST(request: Request) {
       success: true,
       analysis: analysisResult
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("AI Analysis error:", error);
+
+    // Provide more specific error messages
+    let errorMessage = "Analiz sırasında bir hata oluştu";
+
+    if (error?.code === "ETIMEDOUT" || error?.code === "ECONNRESET") {
+      errorMessage = "Baglanti zaman asimina ugradi. Lutfen tekrar deneyin.";
+    } else if (error?.status === 429) {
+      errorMessage = "Cok fazla istek gonderildi. Lutfen biraz bekleyip tekrar deneyin.";
+    } else if (error?.message?.includes("API key")) {
+      errorMessage = "AI servisi yapilandirma hatasi. Lutfen yoneticiye bildirin.";
+    }
+
     return NextResponse.json(
-      { error: "Analiz sırasında bir hata oluştu" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

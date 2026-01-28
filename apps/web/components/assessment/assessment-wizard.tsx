@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronRight,
@@ -45,6 +45,7 @@ export function AssessmentWizard() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
   const [sessionId] = useState(
     () => `sess_${Date.now()}_${Math.random().toString(36).slice(2)}`
   );
@@ -71,6 +72,11 @@ export function AssessmentWizard() {
     setAnswers((prev) => ({ ...prev, [key]: value }));
   };
 
+  // Scroll to top when step changes, analysis starts, results appear, or error occurs
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentStep, isAnalyzing, results, error]);
+
   const toggleConcern = (concernId: string) => {
     setAnswers((prev) => ({
       ...prev,
@@ -82,6 +88,7 @@ export function AssessmentWizard() {
 
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
+    setError(null);
     try {
       await fetch("/api/assessment/create", {
         method: "POST",
@@ -97,18 +104,48 @@ export function AssessmentWizard() {
       if (data.success) {
         setResults(data.analysis);
       } else {
-        throw new Error(data.error);
+        throw new Error(data.error || "Analiz basarisiz oldu");
       }
-    } catch (error) {
-      console.error("Analysis error:", error);
-      alert("Analiz sırasında bir hata oluştu. Lütfen tekrar deneyin.");
-    } finally {
+    } catch (err: any) {
+      console.error("Analysis error:", err);
+      setError(err.message || "Analiz sirasinda bir hata olustu. Lutfen tekrar deneyin.");
       setIsAnalyzing(false);
     }
   };
 
+  const handleRetry = () => {
+    setError(null);
+    handleAnalyze();
+  };
+
   if (results) {
     return <AssessmentResults results={results} answers={answers} />;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-16">
+        <div className="w-20 h-20 mx-auto mb-6 text-red-500">
+          <svg className="w-full h-full" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h2 className="font-heading text-2xl font-bold text-gray-900 mb-4">
+          Bir Sorun Olustu
+        </h2>
+        <p className="text-gray-600 mb-6 max-w-md mx-auto">
+          {error}
+        </p>
+        <div className="flex justify-center gap-4">
+          <Button variant="outline" onClick={() => { setError(null); setCurrentStep(4); }}>
+            Geri Don
+          </Button>
+          <Button onClick={handleRetry}>
+            Tekrar Dene
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   if (isAnalyzing) {
