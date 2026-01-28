@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { Image, Video, X, Copy } from "lucide-react";
 import type {
   HomeContent,
   AboutContent,
@@ -22,8 +23,16 @@ type ContentEditorProps = {
 type FieldDef = {
   key: string;
   label: string;
-  type?: "text" | "textarea" | "number";
+  type?: "text" | "textarea" | "number" | "media";
   placeholder?: string;
+};
+
+type SystemFile = {
+  name: string;
+  url: string;
+  type: "image" | "video";
+  size: number;
+  folder: string;
 };
 
 type ListEditorProps = {
@@ -90,6 +99,133 @@ function NumberField({
         onChange={(event) => onChange(Number(event.target.value || 0))}
       />
     </label>
+  );
+}
+
+function MediaField({
+  label,
+  value,
+  onChange,
+  mediaType = "all"
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  mediaType?: "image" | "video" | "all";
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [files, setFiles] = useState<SystemFile[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const loadFiles = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/admin/media/files");
+      const data = await res.json();
+      let filtered = data.files || [];
+      if (mediaType !== "all") {
+        filtered = filtered.filter((f: SystemFile) => f.type === mediaType);
+      }
+      setFiles(filtered);
+    } catch (error) {
+      toast.error("Medya dosyaları yüklenemedi.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const openModal = () => {
+    setIsOpen(true);
+    loadFiles();
+  };
+
+  const selectFile = (url: string) => {
+    onChange(url);
+    setIsOpen(false);
+    toast.success("Medya seçildi.");
+  };
+
+  const formatSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / 1024 / 1024).toFixed(1) + " MB";
+  };
+
+  return (
+    <div className="block space-y-1 text-sm">
+      <span className={labelClasses}>{label}</span>
+      <div className="flex gap-2">
+        <input
+          className={`${inputClasses} flex-1`}
+          value={value}
+          placeholder="/images/... veya /videos/..."
+          onChange={(event) => onChange(event.target.value)}
+        />
+        <button
+          type="button"
+          onClick={openModal}
+          className="px-3 py-2 bg-primary-500 text-white text-xs font-medium rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-1"
+        >
+          {mediaType === "video" ? <Video className="w-4 h-4" /> : <Image className="w-4 h-4" />}
+          Seç
+        </button>
+      </div>
+      {value && (
+        <div className="mt-2">
+          {value.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i) ? (
+            <img src={value} alt="Önizleme" className="h-16 w-24 object-cover rounded-lg border" />
+          ) : value.match(/\.(mp4|webm|mov)$/i) ? (
+            <div className="h-16 w-24 bg-slate-100 rounded-lg border flex items-center justify-center">
+              <Video className="w-6 h-6 text-slate-400" />
+            </div>
+          ) : null}
+        </div>
+      )}
+
+      {/* Media Picker Modal */}
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setIsOpen(false)}>
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b">
+              <h3 className="text-lg font-semibold">Medya Seç</h3>
+              <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              {isLoading ? (
+                <div className="text-center py-10 text-slate-500">Yükleniyor...</div>
+              ) : files.length === 0 ? (
+                <div className="text-center py-10 text-slate-500">Dosya bulunamadı.</div>
+              ) : (
+                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                  {files.map((file) => (
+                    <button
+                      key={file.url}
+                      type="button"
+                      onClick={() => selectFile(file.url)}
+                      className="group relative rounded-xl border-2 border-transparent hover:border-primary-400 overflow-hidden transition-colors"
+                    >
+                      <div className="aspect-video bg-slate-100 flex items-center justify-center">
+                        {file.type === "image" ? (
+                          <img src={file.url} alt={file.name} className="w-full h-full object-cover" loading="lazy" />
+                        ) : (
+                          <Video className="w-8 h-8 text-slate-400" />
+                        )}
+                      </div>
+                      <div className="p-1.5">
+                        <p className="text-xs font-medium text-slate-700 truncate">{file.name}</p>
+                        <p className="text-xs text-slate-400">{formatSize(file.size)}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -203,6 +339,26 @@ function ObjectListField({ label, items, fields, emptyItem, onChange }: ListEdit
                     key={field.key}
                     label={field.label}
                     value={Number(value) || 0}
+                    onChange={(nextValue) => updateItem(index, field.key, nextValue)}
+                  />
+                );
+              }
+              // URL alanları için MediaField kullan
+              const isMediaField = field.key.toLowerCase().includes("url") ||
+                field.key.toLowerCase().includes("src") ||
+                field.key.toLowerCase().includes("thumbnail") ||
+                field.key.toLowerCase().includes("image") ||
+                field.key.toLowerCase().includes("video");
+
+              if (isMediaField) {
+                const mediaType = field.key.toLowerCase().includes("video") ? "video" :
+                  field.key.toLowerCase().includes("thumbnail") ? "image" : "all";
+                return (
+                  <MediaField
+                    key={field.key}
+                    label={field.label}
+                    value={String(value)}
+                    mediaType={mediaType as "image" | "video" | "all"}
                     onChange={(nextValue) => updateItem(index, field.key, nextValue)}
                   />
                 );
@@ -385,9 +541,10 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               />
             </div>
             <div className="grid gap-4 md:grid-cols-2">
-              <TextField
+              <MediaField
                 label="Arka Plan Görsel URL"
                 value={home.hero.backgroundImage.src}
+                mediaType="image"
                 onChange={(value) => updateField("hero.backgroundImage.src", value)}
               />
               <TextField
@@ -395,9 +552,10 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
                 value={home.hero.backgroundImage.alt}
                 onChange={(value) => updateField("hero.backgroundImage.alt", value)}
               />
-              <TextField
+              <MediaField
                 label="Portre Görsel URL"
                 value={home.hero.portraitImage.src}
+                mediaType="image"
                 onChange={(value) => updateField("hero.portraitImage.src", value)}
               />
               <TextField
@@ -602,9 +760,10 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               ]}
             />
             <div className="grid gap-4 md:grid-cols-2">
-              <TextField
+              <MediaField
                 label="Görsel URL"
                 value={home.aboutPreview.image.src}
+                mediaType="image"
                 onChange={(value) => updateField("aboutPreview.image.src", value)}
               />
               <TextField
@@ -758,9 +917,10 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               ]}
             />
             <div className="grid gap-4 md:grid-cols-2">
-              <TextField
+              <MediaField
                 label="Görsel URL"
                 value={about.hero.image.src}
+                mediaType="image"
                 onChange={(value) => updateField("hero.image.src", value)}
               />
               <TextField
