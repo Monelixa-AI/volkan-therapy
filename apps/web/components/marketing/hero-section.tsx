@@ -151,19 +151,19 @@ export function HeroSection({ content }: HeroSectionProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 md:p-8"
             onClick={() => setShowVideo(false)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="relative w-full max-w-4xl"
+              className="relative w-full max-w-3xl max-h-[80vh]"
               onClick={(e) => e.stopPropagation()}
             >
               <button
                 onClick={() => setShowVideo(false)}
-                className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+                className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors z-10"
               >
                 <X className="w-8 h-8" />
               </button>
@@ -171,7 +171,7 @@ export function HeroSection({ content }: HeroSectionProps) {
                 src={content.heroVideoUrl}
                 controls
                 autoPlay
-                className="w-full rounded-xl"
+                className="w-full max-h-[80vh] rounded-xl object-contain"
               />
             </motion.div>
           </motion.div>
