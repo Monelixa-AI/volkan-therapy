@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type {
   BackupSettings,
+  ChatbotSettings,
   EmailSettings,
   SiteInfoSettings
 } from "@/lib/settings-defaults";
@@ -18,6 +19,7 @@ type AdminSettingsFormProps = {
   initialSiteInfo: SiteInfoSettings;
   initialEmailSettings: EmailSettings;
   initialBackupSettings: BackupSettings;
+  initialChatbotSettings: ChatbotSettings;
   initialBackups: BackupExportItem[];
 };
 
@@ -35,6 +37,7 @@ export function AdminSettingsForm({
   initialSiteInfo,
   initialEmailSettings,
   initialBackupSettings,
+  initialChatbotSettings,
   initialBackups
 }: AdminSettingsFormProps) {
   const [siteInfo, setSiteInfo] = useState<SiteInfoSettings>(initialSiteInfo);
@@ -42,6 +45,8 @@ export function AdminSettingsForm({
     useState<EmailSettings>(initialEmailSettings);
   const [backupSettings, setBackupSettings] =
     useState<BackupSettings>(initialBackupSettings);
+  const [chatbotSettings, setChatbotSettings] =
+    useState<ChatbotSettings>(initialChatbotSettings);
   const [backups, setBackups] = useState(initialBackups);
   const [resendKeyInput, setResendKeyInput] = useState("");
   const [reminderOffsets, setReminderOffsets] = useState(
@@ -90,7 +95,8 @@ export function AdminSettingsForm({
             reminderOffsetsMinutes: offsetsToSave,
             thankYouOffsetMinutes: thankYouMinutes
           },
-          backupSettings
+          backupSettings,
+          chatbotSettings
         })
       });
       if (!res.ok) {
@@ -710,6 +716,99 @@ export function AdminSettingsForm({
               )}
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">AI Chatbot</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          <label className="text-sm flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={chatbotSettings.enabled}
+              onChange={(event) =>
+                setChatbotSettings({ ...chatbotSettings, enabled: event.target.checked })
+              }
+            />
+            <span className="text-slate-600">Chatbot Aktif</span>
+          </label>
+          <label className="text-sm">
+            <span className="block text-slate-600 mb-1">Model</span>
+            <select
+              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+              value={chatbotSettings.model}
+              onChange={(event) =>
+                setChatbotSettings({ ...chatbotSettings, model: event.target.value })
+              }
+            >
+              <option value="meta-llama/llama-3.2-3b-instruct:free">Llama 3.2 3B (Free)</option>
+              <option value="google/gemma-2-9b-it:free">Gemma 2 9B (Free)</option>
+              <option value="microsoft/phi-3-mini-128k-instruct:free">Phi-3 Mini (Free)</option>
+              <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash (Free)</option>
+            </select>
+          </label>
+          <label className="text-sm">
+            <span className="block text-slate-600 mb-1">Maks. Mesaj Sayisi</span>
+            <input
+              type="number"
+              min={1}
+              max={100}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+              value={chatbotSettings.maxMessagesPerSession}
+              onChange={(event) =>
+                setChatbotSettings({
+                  ...chatbotSettings,
+                  maxMessagesPerSession: Number(event.target.value)
+                })
+              }
+            />
+          </label>
+          <label className="text-sm">
+            <span className="block text-slate-600 mb-1">Sicaklik (0-2)</span>
+            <input
+              type="number"
+              min={0}
+              max={2}
+              step={0.1}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+              value={chatbotSettings.temperature}
+              onChange={(event) =>
+                setChatbotSettings({
+                  ...chatbotSettings,
+                  temperature: Number(event.target.value)
+                })
+              }
+            />
+          </label>
+        </div>
+        <div className="mt-4">
+          <label className="text-sm">
+            <span className="block text-slate-600 mb-1">Karsilama Mesaji</span>
+            <textarea
+              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+              rows={2}
+              value={chatbotSettings.welcomeMessage}
+              onChange={(event) =>
+                setChatbotSettings({ ...chatbotSettings, welcomeMessage: event.target.value })
+              }
+            />
+          </label>
+        </div>
+        <div className="mt-4">
+          <label className="text-sm">
+            <span className="block text-slate-600 mb-1">Sistem Promptu (AI Davranis Talimatlari)</span>
+            <textarea
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-xs"
+              rows={12}
+              value={chatbotSettings.systemPrompt}
+              onChange={(event) =>
+                setChatbotSettings({ ...chatbotSettings, systemPrompt: event.target.value })
+              }
+            />
+          </label>
+          <p className="mt-1 text-xs text-slate-500">
+            AI&apos;nin nasil davranacagini, hangi konularda yanit verecegini ve hangi bilgileri kullanacagini burada belirleyin.
+          </p>
         </div>
       </section>
 

@@ -4,9 +4,11 @@ import { getAdminFromSession } from "@/lib/admin-auth";
 import { encryptSecret } from "@/lib/encryption";
 import {
   getBackupSettings,
+  getChatbotSettings,
   getEmailSettings,
   getSiteInfo,
   setBackupSettings,
+  setChatbotSettings,
   setEmailSettings,
   setSiteInfo
 } from "@/lib/site-settings";
@@ -67,17 +69,27 @@ const backupSettingsSchema = z.object({
   lastRunAt: z.string().nullable()
 });
 
+const chatbotSettingsSchema = z.object({
+  enabled: z.boolean(),
+  model: z.string().min(1),
+  systemPrompt: z.string().min(1),
+  welcomeMessage: z.string().min(1),
+  maxMessagesPerSession: z.number().int().min(1).max(100),
+  temperature: z.number().min(0).max(2)
+});
+
 export async function GET() {
   const admin = await getAdminFromSession();
   if (!admin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const [siteInfo, emailSettings, backupSettings] = await Promise.all([
+  const [siteInfo, emailSettings, backupSettings, chatbotSettings] = await Promise.all([
     getSiteInfo(),
     getEmailSettings(),
-    getBackupSettings()
+    getBackupSettings(),
+    getChatbotSettings()
   ]);
-  return NextResponse.json({ siteInfo, emailSettings, backupSettings });
+  return NextResponse.json({ siteInfo, emailSettings, backupSettings, chatbotSettings });
 }
 
 export async function PUT(request: Request) {
@@ -91,6 +103,7 @@ export async function PUT(request: Request) {
     const siteInfo = siteInfoSchema.parse(payload.siteInfo);
     const emailSettingsInput = emailSettingsSchema.parse(payload.emailSettings);
     const backupSettings = backupSettingsSchema.parse(payload.backupSettings);
+    const chatbotSettings = chatbotSettingsSchema.parse(payload.chatbotSettings);
 
     let resendApiKeyEncrypted = emailSettingsInput.resendApiKeyEncrypted;
     if (emailSettingsInput.resendApiKeyPlain) {
@@ -103,7 +116,8 @@ export async function PUT(request: Request) {
         ...emailSettingsInput,
         resendApiKeyEncrypted
       }),
-      setBackupSettings(backupSettings)
+      setBackupSettings(backupSettings),
+      setChatbotSettings(chatbotSettings)
     ]);
 
     return NextResponse.json({ success: true });

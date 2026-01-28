@@ -4,7 +4,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { FloatingButtons } from "@/components/layout/floating-buttons";
 import { Toaster } from "@/components/ui/sonner";
-import { getSiteInfo } from "@/lib/site-settings";
+import { getChatbotSettings, getSiteInfo } from "@/lib/site-settings";
 import { getLegalPages } from "@/lib/legal";
 import "./globals.css";
 
@@ -59,7 +59,11 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [siteInfo, legalPages] = await Promise.all([getSiteInfo(), getLegalPages()]);
+  const [siteInfo, legalPages, chatbotSettings] = await Promise.all([
+    getSiteInfo(),
+    getLegalPages(),
+    getChatbotSettings()
+  ]);
 
   return (
     <html
@@ -70,7 +74,7 @@ export default async function RootLayout({
         <Header siteInfo={siteInfo} />
         {children}
         <Footer siteInfo={siteInfo} legalPages={legalPages} />
-        <FloatingButtons siteInfo={siteInfo} />
+        <FloatingButtons siteInfo={siteInfo} chatbotSettings={chatbotSettings} />
         <Toaster position="top-right" />
       </body>
     </html>

@@ -3,9 +3,11 @@ import {
   DEFAULT_SITE_INFO,
   DEFAULT_EMAIL_SETTINGS,
   DEFAULT_BACKUP_SETTINGS,
+  DEFAULT_CHATBOT_SETTINGS,
   type SiteInfoSettings,
   type EmailSettings,
-  type BackupSettings
+  type BackupSettings,
+  type ChatbotSettings
 } from "@/lib/settings-defaults";
 
 export async function getSiteInfo() {
@@ -30,4 +32,12 @@ export async function getBackupSettings() {
 
 export async function setBackupSettings(value: BackupSettings) {
   await setSetting("backup_settings", value);
+}
+
+export async function getChatbotSettings() {
+  return getSetting<ChatbotSettings>("chatbot_settings", DEFAULT_CHATBOT_SETTINGS);
+}
+
+export async function setChatbotSettings(value: ChatbotSettings) {
+  await setSetting("chatbot_settings", value);
 }
