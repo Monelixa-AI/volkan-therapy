@@ -27,9 +27,9 @@ const CONTENT_CONFIG: Record<
 > = {
   home: { title: "Ana Sayfa", loader: getHomeContent },
   about: { title: "Hakkımda", loader: getAboutContent },
-  "services-page": { title: "Hizmetler Sayfasi", loader: getServicesPageContent },
+  "services-page": { title: "Hizmetler Sayfası", loader: getServicesPageContent },
   booking: { title: "Randevu", loader: getBookingContent },
-  assessment: { title: "Degerlendirme", loader: getAssessmentContent },
+  assessment: { title: "Değerlendirme", loader: getAssessmentContent },
   therapy: { title: "Terapi Süreci", loader: getTherapyContent },
   contact: { title: "İletişim", loader: getContactContent },
   blog: { title: "Blog", loader: getBlogContent }

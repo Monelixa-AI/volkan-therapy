@@ -142,7 +142,7 @@ function StringListField({
           )
         }
       />
-      <p className="text-xs text-slate-400">Her satira bir madde yazin.</p>
+      <p className="text-xs text-slate-400">Her satıra bir madde yazın.</p>
     </label>
   );
 }
@@ -176,7 +176,7 @@ function ObjectListField({ label, items, fields, emptyItem, onChange }: ListEdit
         </button>
       </div>
       {items.length === 0 && (
-        <p className="text-xs text-slate-400">Liste bos.</p>
+        <p className="text-xs text-slate-400">Liste boş.</p>
       )}
       {items.map((item, index) => (
         <div
@@ -263,7 +263,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
 
   const handleSave = async () => {
     if (contentKey === "blog" && featuredError) {
-      toast.error("Featured JSON hatali. Once duzeltin.");
+      toast.error("Featured JSON hatalı. Önce düzeltin.");
       return;
     }
 
@@ -276,7 +276,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
           featuredArticles: Array.isArray(parsed) ? parsed : []
         };
       } catch (error) {
-        toast.error("Featured JSON hatali.");
+        toast.error("Featured JSON hatalı.");
         return;
       }
     }
@@ -290,12 +290,12 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Kayit basarisiz");
+        throw new Error(data.error || "Kayıt başarısız");
       }
       setForm(data.data);
-      toast.success("Icerik kaydedildi.");
+      toast.success("İçerik kaydedildi.");
     } catch (error: any) {
-      toast.error(error.message || "Kayit sirasinda hata olustu.");
+      toast.error(error.message || "Kayıt sırasında hata oluştu.");
     } finally {
       setIsSaving(false);
     }
@@ -315,7 +315,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
-          <p className="text-sm text-slate-500">Sayfa icerigini guncelleyin.</p>
+          <p className="text-sm text-slate-500">Sayfa içeriğini güncelleyin.</p>
         </div>
         <button
           type="button"
@@ -336,7 +336,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
             />
             <div className="grid gap-4 md:grid-cols-2">
               <TextField
-                label="Baslik"
+                label="Başlık"
                 value={home.hero.title}
                 onChange={(value) => updateField("hero.title", value)}
               />
@@ -346,19 +346,19 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
                 onChange={(value) => updateField("hero.highlight", value)}
               />
               <TextField
-                label="Baslik Sonu"
+                label="Başlık Sonu"
                 value={home.hero.titleSuffix}
                 onChange={(value) => updateField("hero.titleSuffix", value)}
               />
             </div>
             <TextAreaField
-              label="Aciklama"
+              label="Açıklama"
               value={home.hero.description}
               onChange={(value) => updateField("hero.description", value)}
               rows={4}
             />
             <StringListField
-              label="Basarilar"
+              label="Başarılar"
               value={home.hero.achievements}
               onChange={(value) => updateField("hero.achievements", value)}
             />
@@ -374,19 +374,19 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
                 onChange={(value) => updateField("hero.primaryCta.href", value)}
               />
               <TextField
-                label="Ikincil CTA Etiketi"
+                label="İkincil CTA Etiketi"
                 value={home.hero.secondaryCta.label}
                 onChange={(value) => updateField("hero.secondaryCta.label", value)}
               />
               <TextField
-                label="Ikincil CTA Link"
+                label="İkincil CTA Link"
                 value={home.hero.secondaryCta.href}
                 onChange={(value) => updateField("hero.secondaryCta.href", value)}
               />
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <TextField
-                label="Arka Plan Gorsel URL"
+                label="Arka Plan Görsel URL"
                 value={home.hero.backgroundImage.src}
                 onChange={(value) => updateField("hero.backgroundImage.src", value)}
               />
@@ -396,7 +396,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
                 onChange={(value) => updateField("hero.backgroundImage.alt", value)}
               />
               <TextField
-                label="Portre Gorsel URL"
+                label="Portre Görsel URL"
                 value={home.hero.portraitImage.src}
                 onChange={(value) => updateField("hero.portraitImage.src", value)}
               />
@@ -412,7 +412,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               onChange={(items) => updateField("hero.statCards", items)}
               emptyItem={{ value: "", label: "" }}
               fields={[
-                { key: "value", label: "Deger" },
+                { key: "value", label: "Değer" },
                 { key: "label", label: "Etiket" }
               ]}
             />
@@ -420,16 +420,16 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
 
           <Section title="Stats">
             <ObjectListField
-              label="Istatistikler"
+              label="İstatistikler"
               items={home.stats.items}
               onChange={(items) => updateField("stats.items", items)}
               emptyItem={{ icon: "clock", value: 0, suffix: "", label: "", color: "" }}
               fields={[
-                { key: "icon", label: "Ikon Anahtari" },
-                { key: "value", label: "Deger", type: "number" },
+                { key: "icon", label: "İkon Anahtarı" },
+                { key: "value", label: "Değer", type: "number" },
                 { key: "suffix", label: "Ek (%, +)" },
                 { key: "label", label: "Etiket" },
-                { key: "color", label: "Renk Sinifi" }
+                { key: "color", label: "Renk Sınıfı" }
               ]}
             />
           </Section>
@@ -437,7 +437,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
           <Section title="Problemler">
             <div className="grid gap-4 md:grid-cols-2">
               <TextField
-                label="Baslik"
+                label="Başlık"
                 value={home.problems.title}
                 onChange={(value) => updateField("problems.title", value)}
               />
@@ -448,7 +448,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               />
             </div>
             <TextAreaField
-              label="Aciklama"
+              label="Açıklama"
               value={home.problems.description}
               onChange={(value) => updateField("problems.description", value)}
               rows={3}
@@ -471,9 +471,9 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               onChange={(items) => updateField("problems.items", items)}
               emptyItem={{ title: "", description: "", icon: "eye" }}
               fields={[
-                { key: "title", label: "Baslik" },
-                { key: "description", label: "Aciklama", type: "textarea" },
-                { key: "icon", label: "Ikon Anahtari" }
+                { key: "title", label: "Başlık" },
+                { key: "description", label: "Açıklama", type: "textarea" },
+                { key: "icon", label: "İkon Anahtarı" }
               ]}
             />
           </Section>
@@ -481,7 +481,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
           <Section title="Hizmetler">
             <div className="grid gap-4 md:grid-cols-2">
               <TextField
-                label="Baslik"
+                label="Başlık"
                 value={home.services.title}
                 onChange={(value) => updateField("services.title", value)}
               />
@@ -491,28 +491,28 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
                 onChange={(value) => updateField("services.highlight", value)}
               />
               <TextAreaField
-                label="Aciklama"
+                label="Açıklama"
                 value={home.services.description}
                 onChange={(value) => updateField("services.description", value)}
                 rows={2}
               />
               <TextField
-                label="Cocuk Etiketi"
+                label="Çocuk Etiketi"
                 value={home.services.childrenLabel}
                 onChange={(value) => updateField("services.childrenLabel", value)}
               />
               <TextField
-                label="Yetiskin Etiketi"
+                label="Yetişkin Etiketi"
                 value={home.services.adultsLabel}
                 onChange={(value) => updateField("services.adultsLabel", value)}
               />
             </div>
           </Section>
 
-          <Section title="Terapi Bolumu">
+          <Section title="Terapi Bölümü">
             <div className="grid gap-4 md:grid-cols-2">
               <TextField
-                label="Baslik"
+                label="Başlık"
                 value={home.therapy.title}
                 onChange={(value) => updateField("therapy.title", value)}
               />
@@ -523,12 +523,12 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               />
             </div>
             <TextAreaField
-              label="Aciklama"
+              label="Açıklama"
               value={home.therapy.description}
               onChange={(value) => updateField("therapy.description", value)}
             />
             <StringListField
-              label="Adimlar"
+              label="Adımlar"
               value={home.therapy.steps}
               onChange={(value) => updateField("therapy.steps", value)}
             />
@@ -538,8 +538,8 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               onChange={(items) => updateField("therapy.gallery", items)}
               emptyItem={{ src: "", title: "" }}
               fields={[
-                { key: "src", label: "Gorsel URL" },
-                { key: "title", label: "Baslik" }
+                { key: "src", label: "Görsel URL" },
+                { key: "title", label: "Başlık" }
               ]}
             />
             <div className="grid gap-4 md:grid-cols-2">
@@ -556,10 +556,10 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
             </div>
           </Section>
 
-          <Section title="Hakkımda Onizleme">
+          <Section title="Hakkımda Önizleme">
             <div className="grid gap-4 md:grid-cols-2">
               <TextField
-                label="Isim"
+                label="İsim"
                 value={home.aboutPreview.name}
                 onChange={(value) => updateField("aboutPreview.name", value)}
               />
@@ -569,12 +569,12 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
                 onChange={(value) => updateField("aboutPreview.highlight", value)}
               />
               <TextField
-                label="Unvan"
+                label="Ünvan"
                 value={home.aboutPreview.title}
                 onChange={(value) => updateField("aboutPreview.title", value)}
               />
               <TextField
-                label="Deneyim Deger"
+                label="Deneyim Değer"
                 value={home.aboutPreview.experienceValue}
                 onChange={(value) => updateField("aboutPreview.experienceValue", value)}
               />
@@ -585,7 +585,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               />
             </div>
             <TextAreaField
-              label="Alinti"
+              label="Alıntı"
               value={home.aboutPreview.quote}
               onChange={(value) => updateField("aboutPreview.quote", value)}
               rows={3}
@@ -596,19 +596,19 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               onChange={(items) => updateField("aboutPreview.credentials", items)}
               emptyItem={{ title: "", subtitle: "", icon: "" }}
               fields={[
-                { key: "title", label: "Baslik" },
-                { key: "subtitle", label: "Alt Baslik" },
-                { key: "icon", label: "Ikon Anahtari" }
+                { key: "title", label: "Başlık" },
+                { key: "subtitle", label: "Alt Başlık" },
+                { key: "icon", label: "İkon Anahtarı" }
               ]}
             />
             <div className="grid gap-4 md:grid-cols-2">
               <TextField
-                label="Gorsel URL"
+                label="Görsel URL"
                 value={home.aboutPreview.image.src}
                 onChange={(value) => updateField("aboutPreview.image.src", value)}
               />
               <TextField
-                label="Gorsel Alt"
+                label="Görsel Alt"
                 value={home.aboutPreview.image.alt}
                 onChange={(value) => updateField("aboutPreview.image.alt", value)}
               />
@@ -617,12 +617,12 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
 
           <Section title="AI CTA">
             <TextField
-              label="Baslik"
+              label="Başlık"
               value={home.aiCta.title}
               onChange={(value) => updateField("aiCta.title", value)}
             />
             <TextAreaField
-              label="Aciklama"
+              label="Açıklama"
               value={home.aiCta.description}
               onChange={(value) => updateField("aiCta.description", value)}
               rows={3}
@@ -634,7 +634,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               emptyItem={{ text: "", icon: "" }}
               fields={[
                 { key: "text", label: "Metin" },
-                { key: "icon", label: "Ikon Anahtari" }
+                { key: "icon", label: "İkon Anahtarı" }
               ]}
             />
             <div className="grid gap-4 md:grid-cols-2">
@@ -659,7 +659,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
           <Section title="Yorumlar">
             <div className="grid gap-4 md:grid-cols-2">
               <TextField
-                label="Baslik"
+                label="Başlık"
                 value={home.testimonials.title}
                 onChange={(value) => updateField("testimonials.title", value)}
               />
@@ -670,7 +670,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               />
             </div>
             <TextAreaField
-              label="Aciklama"
+              label="Açıklama"
               value={home.testimonials.description}
               onChange={(value) => updateField("testimonials.description", value)}
               rows={2}
@@ -689,9 +689,9 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
                 serviceType: ""
               }}
               fields={[
-                { key: "content", label: "Icerik", type: "textarea" },
+                { key: "content", label: "İçerik", type: "textarea" },
                 { key: "author", label: "Yazar" },
-                { key: "relation", label: "Iliski" },
+                { key: "relation", label: "İlişki" },
                 { key: "location", label: "Konum" },
                 { key: "date", label: "Tarih" },
                 { key: "rating", label: "Puan", type: "number" },
@@ -699,7 +699,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               ]}
             />
             <TextField
-              label="Video Baslik"
+              label="Video Başlık"
               value={home.testimonials.videoTitle}
               onChange={(value) => updateField("testimonials.videoTitle", value)}
             />
@@ -709,7 +709,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               onChange={(items) => updateField("testimonials.videos", items)}
               emptyItem={{ title: "", thumbnail: "", videoUrl: "" }}
               fields={[
-                { key: "title", label: "Baslik" },
+                { key: "title", label: "Başlık" },
                 { key: "thumbnail", label: "Kapak URL" },
                 { key: "videoUrl", label: "Video URL" }
               ]}
@@ -722,7 +722,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
           <Section title="Hero">
             <div className="grid gap-4 md:grid-cols-2">
               <TextField
-                label="Isim"
+                label="İsim"
                 value={about.hero.name}
                 onChange={(value) => updateField("hero.name", value)}
               />
@@ -732,7 +732,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
                 onChange={(value) => updateField("hero.highlight", value)}
               />
               <TextField
-                label="Unvan"
+                label="Ünvan"
                 value={about.hero.title}
                 onChange={(value) => updateField("hero.title", value)}
               />
@@ -743,7 +743,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               onChange={(value) => updateField("hero.paragraphs", value)}
             />
             <TextAreaField
-              label="Alinti"
+              label="Alıntı"
               value={about.hero.quote}
               onChange={(value) => updateField("hero.quote", value)}
             />
@@ -753,18 +753,18 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               onChange={(items) => updateField("hero.stats", items)}
               emptyItem={{ value: "", label: "" }}
               fields={[
-                { key: "value", label: "Deger" },
+                { key: "value", label: "Değer" },
                 { key: "label", label: "Etiket" }
               ]}
             />
             <div className="grid gap-4 md:grid-cols-2">
               <TextField
-                label="Gorsel URL"
+                label="Görsel URL"
                 value={about.hero.image.src}
                 onChange={(value) => updateField("hero.image.src", value)}
               />
               <TextField
-                label="Gorsel Alt"
+                label="Görsel Alt"
                 value={about.hero.image.alt}
                 onChange={(value) => updateField("hero.image.alt", value)}
               />
@@ -778,10 +778,10 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               onChange={(items) => updateField("timeline", items)}
               emptyItem={{ year: "", title: "", description: "", icon: "" }}
               fields={[
-                { key: "year", label: "Yil" },
-                { key: "title", label: "Baslik" },
-                { key: "description", label: "Aciklama", type: "textarea" },
-                { key: "icon", label: "Ikon Anahtari" }
+                { key: "year", label: "Yıl" },
+                { key: "title", label: "Başlık" },
+                { key: "description", label: "Açıklama", type: "textarea" },
+                { key: "icon", label: "İkon Anahtarı" }
               ]}
             />
           </Section>
@@ -794,16 +794,16 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
             />
           </Section>
 
-          <Section title="Degerler">
+          <Section title="Değerler">
             <ObjectListField
               label="Deger Kartlari"
               items={about.values}
               onChange={(items) => updateField("values", items)}
               emptyItem={{ title: "", description: "", icon: "" }}
               fields={[
-                { key: "title", label: "Baslik" },
-                { key: "description", label: "Aciklama", type: "textarea" },
-                { key: "icon", label: "Ikon Anahtari" }
+                { key: "title", label: "Başlık" },
+                { key: "description", label: "Açıklama", type: "textarea" },
+                { key: "icon", label: "İkon Anahtarı" }
               ]}
             />
           </Section>
@@ -811,36 +811,36 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
       )}
 
       {contentKey === "services-page" && (
-        <Section title="Hizmetler Sayfasi">
+        <Section title="Hizmetler Sayfası">
           <TextField
-            label="Baslik"
+            label="Başlık"
             value={servicesPage.title}
             onChange={(value) => updateField("title", value)}
           />
           <TextAreaField
-            label="Aciklama"
+            label="Açıklama"
             value={servicesPage.description}
             onChange={(value) => updateField("description", value)}
             rows={3}
           />
           <TextField
-            label="Cocuk Baslik"
+            label="Çocuk Başlık"
             value={servicesPage.childrenTitle}
             onChange={(value) => updateField("childrenTitle", value)}
           />
           <TextAreaField
-            label="Cocuk Aciklama"
+            label="Çocuk Açıklama"
             value={servicesPage.childrenDescription}
             onChange={(value) => updateField("childrenDescription", value)}
             rows={2}
           />
           <TextField
-            label="Yetiskin Baslik"
+            label="Yetişkin Başlık"
             value={servicesPage.adultsTitle}
             onChange={(value) => updateField("adultsTitle", value)}
           />
           <TextAreaField
-            label="Yetiskin Aciklama"
+            label="Yetişkin Açıklama"
             value={servicesPage.adultsDescription}
             onChange={(value) => updateField("adultsDescription", value)}
             rows={2}
@@ -852,7 +852,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
         <Section title="Randevu">
           <div className="grid gap-4 md:grid-cols-2">
             <TextField
-              label="Baslik"
+              label="Başlık"
               value={booking.title}
               onChange={(value) => updateField("title", value)}
             />
@@ -863,7 +863,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
             />
           </div>
           <TextAreaField
-            label="Aciklama"
+            label="Açıklama"
             value={booking.description}
             onChange={(value) => updateField("description", value)}
             rows={2}
@@ -875,7 +875,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
             emptyItem={{ text: "", icon: "" }}
             fields={[
               { key: "text", label: "Metin" },
-              { key: "icon", label: "Ikon Anahtari" }
+              { key: "icon", label: "İkon Anahtarı" }
             ]}
           />
           <TextField
@@ -899,7 +899,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
       )}
 
       {contentKey === "assessment" && (
-        <Section title="Degerlendirme">
+        <Section title="Değerlendirme">
           <div className="grid gap-4 md:grid-cols-2">
             <TextField
               label="Badge"
@@ -907,7 +907,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               onChange={(value) => updateField("badge", value)}
             />
             <TextField
-              label="Baslik"
+              label="Başlık"
               value={assessment.title}
               onChange={(value) => updateField("title", value)}
             />
@@ -918,7 +918,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
             />
           </div>
           <TextAreaField
-            label="Aciklama"
+            label="Açıklama"
             value={assessment.description}
             onChange={(value) => updateField("description", value)}
             rows={3}
@@ -930,7 +930,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
             emptyItem={{ text: "", icon: "" }}
             fields={[
               { key: "text", label: "Metin" },
-              { key: "icon", label: "Ikon Anahtari" }
+              { key: "icon", label: "İkon Anahtarı" }
             ]}
           />
         </Section>
@@ -946,7 +946,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
                 onChange={(value) => updateField("hero.badge", value)}
               />
               <TextField
-                label="Baslik"
+                label="Başlık"
                 value={therapy.hero.title}
                 onChange={(value) => updateField("hero.title", value)}
               />
@@ -957,7 +957,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               />
             </div>
             <TextAreaField
-              label="Aciklama"
+              label="Açıklama"
               value={therapy.hero.description}
               onChange={(value) => updateField("hero.description", value)}
               rows={3}
@@ -986,20 +986,20 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
             </div>
           </Section>
 
-          <Section title="Egitim Rotasi">
+          <Section title="Eğitim Rotası">
             <TextField
-              label="Ozet Baslik"
+              label="Özet Başlık"
               value={therapy.routeSummaryTitle}
               onChange={(value) => updateField("routeSummaryTitle", value)}
             />
             <ObjectListField
-              label="Adimlar"
+              label="Adımlar"
               items={therapy.routeSteps}
               onChange={(items) => updateField("routeSteps", items)}
               emptyItem={{ title: "", description: "" }}
               fields={[
-                { key: "title", label: "Baslik" },
-                { key: "description", label: "Aciklama", type: "textarea" }
+                { key: "title", label: "Başlık" },
+                { key: "description", label: "Açıklama", type: "textarea" }
               ]}
             />
           </Section>
@@ -1007,12 +1007,12 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
           <Section title="Setler">
             <div className="grid gap-4 md:grid-cols-2">
               <TextField
-                label="Baslik"
+                label="Başlık"
                 value={therapy.toolsTitle}
                 onChange={(value) => updateField("toolsTitle", value)}
               />
               <TextAreaField
-                label="Aciklama"
+                label="Açıklama"
                 value={therapy.toolsDescription}
                 onChange={(value) => updateField("toolsDescription", value)}
                 rows={2}
@@ -1024,9 +1024,9 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               onChange={(items) => updateField("toolSets", items)}
               emptyItem={{ title: "", description: "", icon: "" }}
               fields={[
-                { key: "title", label: "Baslik" },
-                { key: "description", label: "Aciklama", type: "textarea" },
-                { key: "icon", label: "Ikon Anahtari" }
+                { key: "title", label: "Başlık" },
+                { key: "description", label: "Açıklama", type: "textarea" },
+                { key: "icon", label: "İkon Anahtarı" }
               ]}
             />
           </Section>
@@ -1034,24 +1034,24 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
           <Section title="Galeri">
             <div className="grid gap-4 md:grid-cols-2">
               <TextField
-                label="Baslik"
+                label="Başlık"
                 value={therapy.galleryTitle}
                 onChange={(value) => updateField("galleryTitle", value)}
               />
               <TextAreaField
-                label="Aciklama"
+                label="Açıklama"
                 value={therapy.galleryDescription}
                 onChange={(value) => updateField("galleryDescription", value)}
                 rows={2}
               />
             </div>
             <ObjectListField
-              label="Galeri Gorselleri"
+              label="Galeri Görselleri"
               items={therapy.gallery}
               onChange={(items) => updateField("gallery", items)}
               emptyItem={{ src: "", label: "" }}
               fields={[
-                { key: "src", label: "Gorsel URL" },
+                { key: "src", label: "Görsel URL" },
                 { key: "label", label: "Etiket" }
               ]}
             />
@@ -1068,7 +1068,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               onChange={(value) => updateField("heroBadge", value)}
             />
             <TextField
-              label="Hero Baslik"
+              label="Hero Başlık"
               value={contact.heroTitle}
               onChange={(value) => updateField("heroTitle", value)}
             />
@@ -1079,7 +1079,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
             />
           </div>
           <TextAreaField
-            label="Hero Aciklama"
+            label="Hero Açıklama"
             value={contact.heroDescription}
             onChange={(value) => updateField("heroDescription", value)}
             rows={3}
@@ -1097,12 +1097,12 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
             />
           </div>
           <TextField
-            label="Randevu Baslik"
+            label="Randevu Başlık"
             value={contact.appointmentTitle}
             onChange={(value) => updateField("appointmentTitle", value)}
           />
           <TextAreaField
-            label="Randevu Aciklama"
+            label="Randevu Açıklama"
             value={contact.appointmentDescription}
             onChange={(value) => updateField("appointmentDescription", value)}
             rows={2}
@@ -1113,34 +1113,34 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
             onChange={(value) => updateField("appointmentFeatures", value)}
           />
           <TextField
-            label="Mesaj Baslik"
+            label="Mesaj Başlık"
             value={contact.messageTitle}
             onChange={(value) => updateField("messageTitle", value)}
           />
           <TextAreaField
-            label="Mesaj Aciklama"
+            label="Mesaj Açıklama"
             value={contact.messageDescription}
             onChange={(value) => updateField("messageDescription", value)}
             rows={2}
           />
           <TextField
-            label="Bilgi Baslik"
+            label="Bilgi Başlık"
             value={contact.infoTitle}
             onChange={(value) => updateField("infoTitle", value)}
           />
           <TextField
-            label="Hizli İletişim Baslik"
+            label="Hızlı İletişim Başlık"
             value={contact.quickContactTitle}
             onChange={(value) => updateField("quickContactTitle", value)}
           />
           <TextAreaField
-            label="Hizli İletişim Aciklama"
+            label="Hızlı İletişim Açıklama"
             value={contact.quickContactDescription}
             onChange={(value) => updateField("quickContactDescription", value)}
             rows={2}
           />
           <TextField
-            label="Konum Baslik"
+            label="Konum Başlık"
             value={contact.locationTitle}
             onChange={(value) => updateField("locationTitle", value)}
           />
@@ -1152,7 +1152,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
           <Section title="Blog">
             <div className="grid gap-4 md:grid-cols-2">
               <TextField
-                label="Baslik"
+                label="Başlık"
                 value={blog.title}
                 onChange={(value) => updateField("title", value)}
               />
@@ -1163,7 +1163,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
               />
             </div>
             <TextAreaField
-              label="Aciklama"
+              label="Açıklama"
               value={blog.description}
               onChange={(value) => updateField("description", value)}
               rows={2}
@@ -1175,12 +1175,12 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
             />
             <div className="grid gap-4 md:grid-cols-2">
               <TextField
-                label="Featured Baslik"
+                label="Featured Başlık"
                 value={blog.featuredTitle}
                 onChange={(value) => updateField("featuredTitle", value)}
               />
               <TextAreaField
-                label="Featured Aciklama"
+                label="Featured Açıklama"
                 value={blog.featuredDescription}
                 onChange={(value) => updateField("featuredDescription", value)}
                 rows={2}
@@ -1199,7 +1199,7 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
                     JSON.parse(value || "[]");
                     setFeaturedError(null);
                   } catch (error: any) {
-                    setFeaturedError("JSON format hatali.");
+                    setFeaturedError("JSON format hatalı.");
                   }
                 }}
               />
@@ -1209,29 +1209,29 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
             </label>
             <div className="grid gap-4 md:grid-cols-2">
               <TextField
-                label="Bulten Baslik"
+                label="Bülten Başlık"
                 value={blog.newsletterTitle}
                 onChange={(value) => updateField("newsletterTitle", value)}
               />
               <TextAreaField
-                label="Bulten Aciklama"
+                label="Bülten Açıklama"
                 value={blog.newsletterDescription}
                 onChange={(value) => updateField("newsletterDescription", value)}
                 rows={2}
               />
               <TextField
-                label="Bulten Placeholder"
+                label="Bülten Placeholder"
                 value={blog.newsletterPlaceholder}
                 onChange={(value) => updateField("newsletterPlaceholder", value)}
               />
               <TextField
-                label="Bulten Buton"
+                label="Bülten Buton"
                 value={blog.newsletterButton}
                 onChange={(value) => updateField("newsletterButton", value)}
               />
             </div>
             <TextAreaField
-              label="Aciklama Notu"
+              label="Açıklama Notu"
               value={blog.disclaimer}
               onChange={(value) => updateField("disclaimer", value)}
               rows={2}
