@@ -67,7 +67,7 @@ export async function POST(request: Request) {
             ...messages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content }))
           ],
           temperature: settings.temperature,
-          max_tokens: 500
+          max_tokens: 1024
         });
 
         const reply = completion.choices[0]?.message?.content || "";
