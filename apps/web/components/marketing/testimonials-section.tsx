@@ -124,67 +124,76 @@ export function TestimonialsSection({ content }: TestimonialsSectionProps) {
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {videos.map((video, index) => {
               const isLocalVideo = video.videoUrl && (video.videoUrl.startsWith("/") || video.videoUrl.endsWith(".mp4"));
-              const handleClick = () => {
-                if (isLocalVideo) {
-                  setActiveVideo(video.videoUrl);
-                }
-              };
+
+              if (isLocalVideo && video.videoUrl) {
+                return (
+                  <motion.div
+                    key={`${video.title}-${index}`}
+                    whileHover={{ scale: 1.05 }}
+                    className="relative aspect-video rounded-xl overflow-hidden cursor-pointer group"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setActiveVideo(video.videoUrl!)}
+                      className="absolute inset-0 w-full h-full z-30"
+                      aria-label={`${video.title} videosunu oynat`}
+                    />
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors z-10 pointer-events-none" />
+                    <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+                      <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Play className="w-8 h-8 text-primary-500 ml-1" />
+                      </div>
+                    </div>
+                    {video.thumbnail ? (
+                      <img
+                        src={video.thumbnail}
+                        alt={video.title}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary-400 to-primary-600" />
+                    )}
+                    <p className="absolute bottom-4 left-4 text-white font-medium z-20 pointer-events-none">
+                      {video.title}
+                    </p>
+                  </motion.div>
+                );
+              }
 
               return (
                 <motion.div
                   key={`${video.title}-${index}`}
                   whileHover={{ scale: 1.05 }}
                   className="relative aspect-video rounded-xl overflow-hidden cursor-pointer group"
-                  onClick={isLocalVideo ? handleClick : undefined}
                 >
-                  {!isLocalVideo && video.videoUrl ? (
+                  {video.videoUrl ? (
                     <a
                       href={video.videoUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="absolute inset-0 block"
+                      className="absolute inset-0 block z-30"
                     >
-                      <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors z-10" />
-                      <div className="absolute inset-0 flex items-center justify-center z-20">
-                        <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <Play className="w-8 h-8 text-primary-500 ml-1" />
-                        </div>
-                      </div>
-                      {video.thumbnail ? (
-                        <img
-                          src={video.thumbnail}
-                          alt={video.title}
-                          className="absolute inset-0 h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary-400 to-primary-600" />
-                      )}
-                      <p className="absolute bottom-4 left-4 text-white font-medium z-20">
-                        {video.title}
-                      </p>
+                      <span className="sr-only">{video.title} videosunu aç</span>
                     </a>
+                  ) : null}
+                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors z-10 pointer-events-none" />
+                  <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+                    <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Play className="w-8 h-8 text-primary-500 ml-1" />
+                    </div>
+                  </div>
+                  {video.thumbnail ? (
+                    <img
+                      src={video.thumbnail}
+                      alt={video.title}
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
                   ) : (
-                    <>
-                      <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors z-10" />
-                      <div className="absolute inset-0 flex items-center justify-center z-20">
-                        <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <Play className="w-8 h-8 text-primary-500 ml-1" />
-                        </div>
-                      </div>
-                      {video.thumbnail ? (
-                        <img
-                          src={video.thumbnail}
-                          alt={video.title}
-                          className="absolute inset-0 h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary-400 to-primary-600" />
-                      )}
-                      <p className="absolute bottom-4 left-4 text-white font-medium z-20">
-                        {video.title}
-                      </p>
-                    </>
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary-400 to-primary-600" />
                   )}
+                  <p className="absolute bottom-4 left-4 text-white font-medium z-20 pointer-events-none">
+                    {video.title}
+                  </p>
                 </motion.div>
               );
             })}

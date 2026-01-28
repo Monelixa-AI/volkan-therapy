@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix build errors for Vercel deployment\n\n- Fix ESLint unescaped entity errors \\(quotes in JSX\\)\n- Fix TypeScript errors with Prisma enum types \\(ServiceCategory, ReminderType\\)\n- Fix Prisma InputJsonValue type casting\n- Fix Resend API parameter name \\(replyTo -> reply_to\\)\n- Fix Twilio lazy initialization to prevent build-time errors\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix TypeScript implicit any error in blog page\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)",
+      "Bash(npx ts-node:*)",
+      "Bash(npx prisma studio:*)",
+      "Bash(npm run db:studio:*)",
+      "Bash(timeout 10 tail:*)",
+      "Bash(npm install:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(node scripts/optimize-images.mjs:*)",
+      "Bash(where:*)",
+      "Bash(ffmpeg:*)",
+      "Bash(curl:*)"
+    ]
+  }
+}
