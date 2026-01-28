@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/admin-auth";
@@ -78,6 +79,23 @@ export async function PUT(
         createdById: admin.id
       }
     });
+  }
+
+  // Revalidate relevant pages based on content key
+  const pathMap: Record<string, string[]> = {
+    home: ["/"],
+    about: ["/hakkimda"],
+    "services-page": ["/hizmetler"],
+    booking: ["/randevu"],
+    assessment: ["/degerlendirme"],
+    therapy: ["/terapi-sureci"],
+    contact: ["/iletisim"],
+    blog: ["/blog"]
+  };
+
+  const paths = pathMap[key] || [];
+  for (const path of paths) {
+    revalidatePath(path);
   }
 
   return NextResponse.json({ data: updated.data });
