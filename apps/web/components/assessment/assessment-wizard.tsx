@@ -46,6 +46,7 @@ export function AssessmentWizard() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [consentChecked, setConsentChecked] = useState(false);
   const [sessionId] = useState(
     () => `sess_${Date.now()}_${Math.random().toString(36).slice(2)}`
   );
@@ -552,7 +553,13 @@ export function AssessmentWizard() {
               </div>
             </div>
             <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-xl">
-              <input type="checkbox" id="consent" required className="mt-1" />
+              <input
+                type="checkbox"
+                id="consent"
+                checked={consentChecked}
+                onChange={(e) => setConsentChecked(e.target.checked)}
+                className="mt-1"
+              />
               <label htmlFor="consent" className="text-sm text-gray-700">
                 Bu bilgilerin yapay zeka ile analiz edilmesine ve{" "}
                 <a href="/kvkk" className="text-primary-500 underline">
@@ -568,7 +575,7 @@ export function AssessmentWizard() {
                 <ChevronLeft className="w-5 h-5 mr-2" />
                 Geri
               </Button>
-              <Button className="flex-1" onClick={handleAnalyze} disabled={!answers.mainConcern}>
+              <Button className="flex-1" onClick={handleAnalyze} disabled={!answers.mainConcern || !consentChecked}>
                 <Sparkles className="w-5 h-5 mr-2" />
                 AI Analizi Başlat
               </Button>
