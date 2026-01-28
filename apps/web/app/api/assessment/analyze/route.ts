@@ -24,17 +24,34 @@ async function callOpenRouterAI(prompt: string): Promise<string> {
     baseURL: "https://openrouter.ai/api/v1"
   });
 
-  const completion = await openai.chat.completions.create({
-    model: "google/gemini-2.0-flash-exp:free",
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: prompt }
-    ],
-    temperature: 0.7,
-    max_tokens: 2000
-  });
+  // Ücretsiz modeller sırayla denenecek
+  const freeModels = [
+    "meta-llama/llama-3.2-3b-instruct:free",
+    "google/gemma-2-9b-it:free",
+    "microsoft/phi-3-mini-128k-instruct:free",
+    "google/gemini-2.0-flash-exp:free"
+  ];
 
-  return completion.choices[0].message.content || "";
+  let lastError: any;
+  for (const model of freeModels) {
+    try {
+      const completion = await openai.chat.completions.create({
+        model,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000
+      });
+      return completion.choices[0].message.content || "";
+    } catch (err: any) {
+      lastError = err;
+      console.log(`Model ${model} failed, trying next...`);
+      continue;
+    }
+  }
+  throw lastError;
 }
 
 export async function POST(request: Request) {
@@ -57,11 +74,11 @@ export async function POST(request: Request) {
 
     let aiResponse: string;
 
-    // Google AI öncelikli, yoksa OpenRouter fallback
-    if (process.env.GOOGLE_AI_API_KEY) {
-      aiResponse = await callGoogleAI(prompt);
-    } else if (process.env.OPENROUTER_API_KEY) {
+    // OpenRouter öncelikli (Google AI Türkiye'den erişilemez)
+    if (process.env.OPENROUTER_API_KEY) {
       aiResponse = await callOpenRouterAI(prompt);
+    } else if (process.env.GOOGLE_AI_API_KEY) {
+      aiResponse = await callGoogleAI(prompt);
     } else {
       throw new Error("No AI API key configured");
     }
