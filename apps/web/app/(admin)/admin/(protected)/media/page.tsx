@@ -188,9 +188,14 @@ export default function AdminMediaPage() {
             onSubmit={handleUpload}
             className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4"
           >
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700 mb-4">
+              <strong>Not:</strong> Maksimum dosya boyutu 4MB. Büyük videolar için dosyaları{" "}
+              <code className="bg-amber-100 px-1 rounded">public/videos</code> klasörüne manuel olarak yükleyin ve{" "}
+              <strong>Sistem Dosyaları</strong> sekmesinden erişin.
+            </div>
             <div className="grid gap-4 md:grid-cols-2">
               <label className="text-sm block">
-                <span className="block text-slate-600 mb-1">Dosya</span>
+                <span className="block text-slate-600 mb-1">Dosya (max 4MB)</span>
                 <input
                   type="file"
                   name="file"
