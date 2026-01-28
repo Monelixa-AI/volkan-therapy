@@ -540,6 +540,12 @@ export default function ContentEditor({ contentKey, title, initialContent }: Con
                 onChange={(value) => updateField("hero.secondaryCta.href", value)}
               />
             </div>
+            <MediaField
+              label="Hero Tanıtım Videosu URL"
+              value={home.hero.heroVideoUrl || ""}
+              mediaType="video"
+              onChange={(value) => updateField("hero.heroVideoUrl", value)}
+            />
             <div className="grid gap-4 md:grid-cols-2">
               <MediaField
                 label="Arka Plan Görsel URL"

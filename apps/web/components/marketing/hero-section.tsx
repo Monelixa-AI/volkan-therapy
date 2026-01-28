@@ -1,8 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, CheckCircle, Play } from "lucide-react";
+import { ArrowRight, CheckCircle, Play, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { IMAGE_DISCLAIMER } from "@/lib/ui-copy";
 import type { HomeContent } from "@/lib/content-defaults";
@@ -13,6 +14,7 @@ type HeroSectionProps = {
 
 export function HeroSection({ content }: HeroSectionProps) {
   const statCards = content.statCards.slice(0, 2);
+  const [showVideo, setShowVideo] = useState(false);
 
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden">
@@ -72,12 +74,19 @@ export function HeroSection({ content }: HeroSectionProps) {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href={content.secondaryCta.href}>
+              {content.heroVideoUrl ? (
+                <Button size="lg" variant="outline" onClick={() => setShowVideo(true)}>
                   <Play className="w-5 h-5 mr-2" />
                   {content.secondaryCta.label}
-                </Link>
-              </Button>
+                </Button>
+              ) : (
+                <Button size="lg" variant="outline" asChild>
+                  <Link href={content.secondaryCta.href}>
+                    <Play className="w-5 h-5 mr-2" />
+                    {content.secondaryCta.label}
+                  </Link>
+                </Button>
+              )}
             </motion.div>
           </motion.div>
           <motion.div
@@ -134,6 +143,40 @@ export function HeroSection({ content }: HeroSectionProps) {
           />
         </div>
       </motion.div>
+
+      {/* Video Modal */}
+      <AnimatePresence>
+        {showVideo && content.heroVideoUrl && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowVideo(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative w-full max-w-4xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setShowVideo(false)}
+                className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+              >
+                <X className="w-8 h-8" />
+              </button>
+              <video
+                src={content.heroVideoUrl}
+                controls
+                autoPlay
+                className="w-full rounded-xl"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

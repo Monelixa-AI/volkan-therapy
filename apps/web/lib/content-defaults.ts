@@ -8,6 +8,7 @@ export type HomeContent = {
     achievements: string[];
     primaryCta: { label: string; href: string };
     secondaryCta: { label: string; href: string };
+    heroVideoUrl: string;
     backgroundImage: { src: string; alt: string };
     portraitImage: { src: string; alt: string };
     statCards: { value: string; label: string }[];
@@ -202,6 +203,7 @@ export const DEFAULT_HOME_CONTENT: HomeContent = {
     ],
     primaryCta: { label: "Ücretsiz Değerlendirme", href: "/degerlendirme" },
     secondaryCta: { label: "Tanıtım Videosu", href: "#video" },
+    heroVideoUrl: "/videos/tanitim-videosu.mp4",
     backgroundImage: { src: "/images/hero-bg.jpg", alt: "Terapi ortamı" },
     portraitImage: { src: "/images/volkan-portrait.png", alt: "Volkan Özcihan" },
     statCards: [
