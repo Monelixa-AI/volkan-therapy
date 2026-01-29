@@ -31,8 +31,36 @@ type FloatingButtonsProps = {
   chatbotSettings?: ChatbotSettings;
 };
 
+function renderMessageContent(text: string) {
+  // Parse markdown links [text](url) and **bold**
+  const parts = text.split(/(\[.+?\]\(.+?\)|\*\*.+?\*\*)/g);
+  return parts.map((part, i) => {
+    const linkMatch = part.match(/^\[(.+?)\]\((.+?)\)$/);
+    if (linkMatch) {
+      return (
+        <a
+          key={i}
+          href={linkMatch[2]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline font-medium hover:opacity-80"
+        >
+          {linkMatch[1]}
+        </a>
+      );
+    }
+    const boldMatch = part.match(/^\*\*(.+?)\*\*$/);
+    if (boldMatch) {
+      return <strong key={i}>{boldMatch[1]}</strong>;
+    }
+    return part;
+  });
+}
+
 export function FloatingButtons({ siteInfo, chatbotSettings }: FloatingButtonsProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [showBubble, setShowBubble] = useState(false);
+  const [shouldBounce, setShouldBounce] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -65,6 +93,27 @@ export function FloatingButtons({ siteInfo, chatbotSettings }: FloatingButtonsPr
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Attention animation: bounce + tooltip bubble (first visit only)
+  useEffect(() => {
+    if (isChatOpen) return;
+    const alreadyShown = localStorage.getItem("vomi_bubble_shown");
+    if (alreadyShown) return;
+
+    const bounceTimer = setTimeout(() => setShouldBounce(true), 3000);
+    const bubbleTimer = setTimeout(() => setShowBubble(true), 5000);
+    const hideTimer = setTimeout(() => {
+      setShowBubble(false);
+      setShouldBounce(false);
+      localStorage.setItem("vomi_bubble_shown", "1");
+    }, 15000);
+
+    return () => {
+      clearTimeout(bounceTimer);
+      clearTimeout(bubbleTimer);
+      clearTimeout(hideTimer);
+    };
+  }, [isChatOpen]);
+
   const handleCloseChat = () => {
     if (isChatOpen && hasMessagesRef.current) {
       fetch("/api/chat/end-session", {
@@ -74,6 +123,11 @@ export function FloatingButtons({ siteInfo, chatbotSettings }: FloatingButtonsPr
       }).catch(() => {});
     }
     setIsChatOpen(!isChatOpen);
+    if (!isChatOpen) {
+      setShowBubble(false);
+      setShouldBounce(false);
+      localStorage.setItem("vomi_bubble_shown", "1");
+    }
   };
 
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -135,13 +189,40 @@ export function FloatingButtons({ siteInfo, chatbotSettings }: FloatingButtonsPr
       >
         <WhatsAppIcon />
       </motion.a>
+      <AnimatePresence>
+        {showBubble && !isChatOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.9 }}
+            className="fixed bottom-[5.5rem] right-6 z-50 bg-white rounded-2xl shadow-xl px-4 py-3 max-w-[220px]"
+          >
+            <button
+              onClick={() => {
+                setShowBubble(false);
+                setShouldBounce(false);
+                localStorage.setItem("vomi_bubble_shown", "1");
+              }}
+              className="absolute -top-2 -left-2 w-5 h-5 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-gray-500 text-xs"
+            >
+              <X className="w-3 h-3" />
+            </button>
+            <p className="text-sm text-gray-800">Merhaba! Ben Vomi 👋 Size yardımcı olabilir miyim?</p>
+            <div className="absolute -bottom-2 right-8 w-4 h-4 bg-white rotate-45 shadow-sm" />
+          </motion.div>
+        )}
+      </AnimatePresence>
       <motion.button
         onClick={handleCloseChat}
         className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-primary-500 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-primary-600 transition-colors"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        animate={
+          shouldBounce && !isChatOpen
+            ? { opacity: 1, y: [0, -12, 0, -6, 0], transition: { duration: 0.8, repeat: Infinity, repeatDelay: 2 } }
+            : { opacity: 1, y: 0 }
+        }
         transition={{ delay: 1.2 }}
       >
         {isChatOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
@@ -228,7 +309,7 @@ export function FloatingButtons({ siteInfo, chatbotSettings }: FloatingButtonsPr
                             : "bg-gray-100 text-gray-800 rounded-bl-none"
                         }`}
                       >
-                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                        <p className="text-sm whitespace-pre-wrap">{renderMessageContent(msg.content)}</p>
                       </div>
                     </div>
                   ))}

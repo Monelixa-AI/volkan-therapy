@@ -72,7 +72,7 @@ export async function POST(request: Request) {
           messages: [
             {
               role: "system",
-              content: `${settings.systemPrompt}\n\nİLETİŞİM BİLGİLERİ (bu bilgileri kullan):\n- Telefon: ${siteInfo.phone}\n- WhatsApp: ${siteInfo.phone}\n- E-posta: ${siteInfo.email}\n- Adres: ${siteInfo.address}\n- Randevu: https://www.volkanozcihan.com/randevu`
+              content: `${settings.systemPrompt}\n\nİLETİŞİM BİLGİLERİ (bu bilgileri kullan):\n- Telefon: ${siteInfo.phone}\n- WhatsApp: ${siteInfo.phone}\n- E-posta: ${siteInfo.email}\n- Adres: ${siteInfo.address}\n- Randevu: https://www.volkanozcihan.com/randevu\n\nLINK KURALLARI: Yanıtlarında link vermek istediğinde mutlaka markdown formatı kullan. WhatsApp için: [WhatsApp'tan ulaşın](https://wa.me/${siteInfo.whatsapp}?text=Merhaba,%20bilgi%20almak%20istiyorum.) — Ücretsiz AI ön değerlendirme için: [AI Ön Değerlendirme](https://www.volkanozcihan.com/ai-degerlendirme) — Randevu için: [Randevu Alın](https://www.volkanozcihan.com/randevu) — Bu linkleri uygun yerlerde kullan.`
             },
             ...messages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content }))
           ],
