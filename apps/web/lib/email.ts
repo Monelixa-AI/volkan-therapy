@@ -206,6 +206,8 @@ export async function sendChatConversationNotification(data: {
   messages: Array<{ role: string; content: string }>;
   messageCount: number;
   startedAt: string;
+  userName?: string;
+  userEmail?: string;
 }) {
   try {
     const client = await getEmailClient();
@@ -229,9 +231,11 @@ export async function sendChatConversationNotification(data: {
       from: client.from,
       to: settings.notificationEmail,
       reply_to: client.replyTo,
-      subject: `Yeni chat görüşmesi (${data.messageCount} mesaj)`,
+      subject: `Yeni chat görüşmesi${data.userName ? ` - ${data.userName}` : ""} (${data.messageCount} mesaj)`,
       html: `
         <h2>Yeni Chat Görüşmesi</h2>
+        ${data.userName ? `<p><strong>Ad Soyad:</strong> ${data.userName}</p>` : ""}
+        ${data.userEmail ? `<p><strong>E-posta:</strong> ${data.userEmail}</p>` : ""}
         <p><strong>Tarih:</strong> ${startDate}</p>
         <p><strong>Mesaj Sayısı:</strong> ${data.messageCount}</p>
         <hr/>

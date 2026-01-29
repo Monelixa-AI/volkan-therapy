@@ -19,6 +19,7 @@ export default async function ChatLogsPage() {
             <thead className="bg-slate-50 text-slate-600">
               <tr>
                 <th className="px-4 py-3 text-left font-medium">Tarih</th>
+                <th className="px-4 py-3 text-left font-medium">Kullanıcı</th>
                 <th className="px-4 py-3 text-left font-medium">Mesaj</th>
                 <th className="px-4 py-3 text-left font-medium">Önizleme</th>
                 <th className="px-4 py-3 text-left font-medium">Durum</th>
@@ -37,6 +38,12 @@ export default async function ChatLogsPage() {
                   <tr key={conv.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3 text-slate-600">
                       {conv.createdAt.toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" })}
+                    </td>
+                    <td className="px-4 py-3 text-slate-900">
+                      <div className="font-medium">{conv.userName || "-"}</div>
+                      {conv.userEmail && (
+                        <div className="text-xs text-slate-500">{conv.userEmail}</div>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-slate-900 font-medium">
                       {conv.messageCount}

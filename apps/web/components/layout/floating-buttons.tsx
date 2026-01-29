@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { SiteInfoSettings, ChatbotSettings } from "@/lib/settings-defaults";
 
@@ -21,6 +21,11 @@ type ChatMessage = {
   content: string;
 };
 
+type UserInfo = {
+  name: string;
+  email: string;
+};
+
 type FloatingButtonsProps = {
   siteInfo: SiteInfoSettings;
   chatbotSettings?: ChatbotSettings;
@@ -32,6 +37,9 @@ export function FloatingButtons({ siteInfo, chatbotSettings }: FloatingButtonsPr
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId] = useState(generateSessionId);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [formName, setFormName] = useState("");
+  const [formEmail, setFormEmail] = useState("");
   const hasMessagesRef = useRef(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const whatsappLink = `https://wa.me/${siteInfo.whatsapp}?text=Merhaba, bilgi almak istiyorum.`;
@@ -48,7 +56,6 @@ export function FloatingButtons({ siteInfo, chatbotSettings }: FloatingButtonsPr
     );
   }, [sessionId]);
 
-  // End session on page unload
   useEffect(() => {
     window.addEventListener("beforeunload", endSession);
     return () => window.removeEventListener("beforeunload", endSession);
@@ -60,7 +67,6 @@ export function FloatingButtons({ siteInfo, chatbotSettings }: FloatingButtonsPr
 
   const handleCloseChat = () => {
     if (isChatOpen && hasMessagesRef.current) {
-      // End session when user closes the chat
       fetch("/api/chat/end-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -70,9 +76,16 @@ export function FloatingButtons({ siteInfo, chatbotSettings }: FloatingButtonsPr
     setIsChatOpen(!isChatOpen);
   };
 
+  const handleUserInfoSubmit = () => {
+    const name = formName.trim();
+    const email = formEmail.trim();
+    if (!name || !email) return;
+    setUserInfo({ name, email });
+  };
+
   const handleSendMessage = async () => {
     const text = inputMessage.trim();
-    if (!text || isLoading) return;
+    if (!text || isLoading || !userInfo) return;
 
     hasMessagesRef.current = true;
     const userMessage: ChatMessage = { role: "user", content: text };
@@ -85,7 +98,7 @@ export function FloatingButtons({ siteInfo, chatbotSettings }: FloatingButtonsPr
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: updatedMessages, sessionId })
+        body: JSON.stringify({ messages: updatedMessages, sessionId, userInfo })
       });
       const data = await res.json();
       const reply = data.reply || data.error || "Yanıt alınamadı.";
@@ -153,68 +166,112 @@ export function FloatingButtons({ siteInfo, chatbotSettings }: FloatingButtonsPr
                 </div>
               </div>
             </div>
-            <div className="h-80 overflow-y-auto p-4 space-y-4">
-              {/* Welcome message */}
-              <div className="flex justify-start">
-                <div className="max-w-[80%] p-3 rounded-2xl bg-gray-100 text-gray-800 rounded-bl-none">
-                  <p className="text-sm">{welcomeMessage}</p>
-                </div>
-              </div>
-              {messages.map((msg, index) => (
-                <div
-                  key={index}
-                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  <div
-                    className={`max-w-[80%] p-3 rounded-2xl ${
-                      msg.role === "user"
-                        ? "bg-primary-500 text-white rounded-br-none"
-                        : "bg-gray-100 text-gray-800 rounded-bl-none"
-                    }`}
-                  >
-                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                  </div>
-                </div>
-              ))}
-              {isLoading && (
+
+            {!userInfo ? (
+              /* User info form */
+              <div className="p-5 space-y-4">
                 <div className="flex justify-start">
-                  <div className="max-w-[80%] p-3 rounded-2xl bg-gray-100 text-gray-800 rounded-bl-none">
-                    <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                  <div className="max-w-[90%] p-3 rounded-2xl bg-gray-100 text-gray-800 rounded-bl-none">
+                    <p className="text-sm">{welcomeMessage}</p>
+                    <p className="text-sm mt-2">Sohbete başlamadan önce lütfen bilgilerinizi giriniz.</p>
                   </div>
                 </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-            <div className="p-4 border-t">
-              {limitReached ? (
-                <p className="text-xs text-center text-gray-500">
-                  Mesaj limitine ulaşıldı.{" "}
-                  <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="text-primary-500 underline">
-                    WhatsApp&apos;tan ulaşın
-                  </a>.
-                </p>
-              ) : (
-                <div className="flex space-x-2">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <User className="w-3.5 h-3.5" />
+                    <span>Bilgileriniz</span>
+                  </div>
                   <input
                     type="text"
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
-                    placeholder="Mesajınızı yazın..."
-                    disabled={isLoading}
-                    className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                    placeholder="Ad Soyad *"
+                    className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    onKeyDown={(e) => e.key === "Enter" && handleUserInfoSubmit()}
+                  />
+                  <input
+                    type="email"
+                    value={formEmail}
+                    onChange={(e) => setFormEmail(e.target.value)}
+                    placeholder="E-posta *"
+                    className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    onKeyDown={(e) => e.key === "Enter" && handleUserInfoSubmit()}
                   />
                   <Button
-                    size="icon"
-                    className="rounded-full"
-                    onClick={handleSendMessage}
-                    disabled={isLoading || !inputMessage.trim()}
+                    className="w-full rounded-lg text-sm"
+                    onClick={handleUserInfoSubmit}
+                    disabled={!formName.trim() || !formEmail.trim()}
                   >
-                    <Send className="w-4 h-4" />
+                    Sohbete Başla
                   </Button>
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              /* Chat area */
+              <>
+                <div className="h-80 overflow-y-auto p-4 space-y-4">
+                  <div className="flex justify-start">
+                    <div className="max-w-[80%] p-3 rounded-2xl bg-gray-100 text-gray-800 rounded-bl-none">
+                      <p className="text-sm">{welcomeMessage}</p>
+                    </div>
+                  </div>
+                  {messages.map((msg, index) => (
+                    <div
+                      key={index}
+                      className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                    >
+                      <div
+                        className={`max-w-[80%] p-3 rounded-2xl ${
+                          msg.role === "user"
+                            ? "bg-primary-500 text-white rounded-br-none"
+                            : "bg-gray-100 text-gray-800 rounded-bl-none"
+                        }`}
+                      >
+                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {isLoading && (
+                    <div className="flex justify-start">
+                      <div className="max-w-[80%] p-3 rounded-2xl bg-gray-100 text-gray-800 rounded-bl-none">
+                        <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                      </div>
+                    </div>
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+                <div className="p-4 border-t">
+                  {limitReached ? (
+                    <p className="text-xs text-center text-gray-500">
+                      Mesaj limitine ulaşıldı.{" "}
+                      <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="text-primary-500 underline">
+                        WhatsApp&apos;tan ulaşın
+                      </a>.
+                    </p>
+                  ) : (
+                    <div className="flex space-x-2">
+                      <input
+                        type="text"
+                        value={inputMessage}
+                        onChange={(e) => setInputMessage(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
+                        placeholder="Mesajınızı yazın..."
+                        disabled={isLoading}
+                        className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+                      />
+                      <Button
+                        size="icon"
+                        className="rounded-full"
+                        onClick={handleSendMessage}
+                        disabled={isLoading || !inputMessage.trim()}
+                      >
+                        <Send className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

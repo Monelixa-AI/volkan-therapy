@@ -32,6 +32,8 @@ export default async function ChatLogDetailPage({
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-2 text-sm">
+        {conversation.userName && <p><strong>Ad Soyad:</strong> {conversation.userName}</p>}
+        {conversation.userEmail && <p><strong>E-posta:</strong> {conversation.userEmail}</p>}
         <p><strong>Tarih:</strong> {conversation.createdAt.toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" })}</p>
         <p><strong>Mesaj Sayısı:</strong> {conversation.messageCount}</p>
         <p>

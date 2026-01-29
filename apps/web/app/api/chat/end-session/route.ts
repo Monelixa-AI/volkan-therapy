@@ -44,7 +44,9 @@ export async function POST(request: Request) {
         sessionId: conversation.sessionId,
         messages,
         messageCount: conversation.messageCount,
-        startedAt: conversation.startedAt.toISOString()
+        startedAt: conversation.startedAt.toISOString(),
+        userName: conversation.userName || undefined,
+        userEmail: conversation.userEmail || undefined
       })
         .then(() =>
           prisma.chatConversation.update({

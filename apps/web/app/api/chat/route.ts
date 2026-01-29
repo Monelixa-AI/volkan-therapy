@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
 import { prisma } from "@/lib/db";
-import { getChatbotSettings } from "@/lib/site-settings";
+import { getChatbotSettings, getSiteInfo } from "@/lib/site-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -12,16 +12,20 @@ type ChatMessage = {
 
 export async function POST(request: Request) {
   try {
-    const { messages, sessionId } = (await request.json()) as {
+    const { messages, sessionId, userInfo } = (await request.json()) as {
       messages: ChatMessage[];
       sessionId?: string;
+      userInfo?: { name: string; email: string };
     };
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json({ error: "Mesaj gerekli." }, { status: 400 });
     }
 
-    const settings = await getChatbotSettings();
+    const [settings, siteInfo] = await Promise.all([
+      getChatbotSettings(),
+      getSiteInfo()
+    ]);
 
     if (!settings.enabled) {
       return NextResponse.json({
@@ -66,7 +70,10 @@ export async function POST(request: Request) {
         const completion = await openai.chat.completions.create({
           model,
           messages: [
-            { role: "system", content: settings.systemPrompt },
+            {
+              role: "system",
+              content: `${settings.systemPrompt}\n\nİLETİŞİM BİLGİLERİ (bu bilgileri kullan):\n- Telefon: ${siteInfo.phone}\n- WhatsApp: ${siteInfo.phone}\n- E-posta: ${siteInfo.email}\n- Adres: ${siteInfo.address}\n- Randevu: https://www.volkanozcihan.com/randevu`
+            },
             ...messages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content }))
           ],
           temperature: settings.temperature,
@@ -86,12 +93,16 @@ export async function POST(request: Request) {
               where: { sessionId },
               create: {
                 sessionId,
+                userName: userInfo?.name || null,
+                userEmail: userInfo?.email || null,
                 messages: allMessages,
                 messageCount: allMessages.length
               },
               update: {
                 messages: allMessages,
-                messageCount: allMessages.length
+                messageCount: allMessages.length,
+                ...(userInfo?.name && { userName: userInfo.name }),
+                ...(userInfo?.email && { userEmail: userInfo.email })
               }
             })
             .catch((err) => console.error("Chat log error:", err));

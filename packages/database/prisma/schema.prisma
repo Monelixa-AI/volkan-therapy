@@ -183,6 +183,12 @@ model Assessment {
 
   mediaUrls           String[]
 
+  contactName         String?
+  contactPhone        String?
+  contactEmail        String?
+  contactDistrict     String?
+  contactCity         String?
+
   aiAnalysis          Json?
   aiRecommendations   String?  @db.Text
 
@@ -457,6 +463,8 @@ enum ReminderStatus {
 model ChatConversation {
   id           String    @id @default(cuid())
   sessionId    String    @unique
+  userName     String?
+  userEmail    String?
   messages     Json      // [{role, content, timestamp}]
   messageCount Int       @default(0)
   startedAt    DateTime  @default(now())

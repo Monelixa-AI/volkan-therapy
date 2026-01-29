@@ -29,6 +29,11 @@ export async function POST(request: Request) {
       motorSkills: answers.motorSkills || null,
       teacherFeedback: answers.teacherFeedback || null,
       mainConcern: answers.mainConcern || null,
+      contactName: answers.contactName || null,
+      contactPhone: answers.contactPhone || null,
+      contactEmail: answers.contactEmail || null,
+      contactDistrict: answers.contactDistrict || null,
+      contactCity: answers.contactCity || null,
       mediaUrls: [] as string[],
       status: "IN_PROGRESS" as const
     };

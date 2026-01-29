@@ -9,7 +9,8 @@ import {
   Baby,
   Eye,
   Brain,
-  FileText
+  FileText,
+  UserCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AssessmentResults } from "./assessment-results";
@@ -18,7 +19,8 @@ const steps = [
   { id: 1, title: "Genel Bilgiler", icon: Baby },
   { id: 2, title: "Duyusal Gözlemler", icon: Eye },
   { id: 3, title: "Detaylı Sorular", icon: Brain },
-  { id: 4, title: "Ek Bilgiler", icon: FileText }
+  { id: 4, title: "Ek Bilgiler", icon: FileText },
+  { id: 5, title: "İletişim Bilgileri", icon: UserCircle }
 ];
 
 const ageOptions = [
@@ -66,7 +68,12 @@ export function AssessmentWizard() {
     routineReaction: "",
     motorSkills: "",
     teacherFeedback: "",
-    mainConcern: ""
+    mainConcern: "",
+    contactName: "",
+    contactPhone: "",
+    contactEmail: "",
+    contactDistrict: "",
+    contactCity: ""
   });
 
   const updateAnswer = (key: string, value: any) => {
@@ -138,7 +145,7 @@ export function AssessmentWizard() {
           {error}
         </p>
         <div className="flex justify-center gap-4">
-          <Button variant="outline" onClick={() => { setError(null); setCurrentStep(4); }}>
+          <Button variant="outline" onClick={() => { setError(null); setCurrentStep(5); }}>
             Geri Don
           </Button>
           <Button onClick={handleRetry}>
@@ -575,7 +582,101 @@ export function AssessmentWizard() {
                 <ChevronLeft className="w-5 h-5 mr-2" />
                 Geri
               </Button>
-              <Button className="flex-1" onClick={handleAnalyze} disabled={!answers.mainConcern || !consentChecked}>
+              <Button className="flex-1" onClick={() => setCurrentStep(5)} disabled={!answers.mainConcern || !consentChecked}>
+                Devam Et
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+        {currentStep === 5 && (
+          <motion.div
+            key="step5"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+          >
+            <div className="text-center mb-8">
+              <h2 className="font-heading text-2xl font-bold text-gray-900 mb-2">
+                İletişim Bilgileri
+              </h2>
+              <p className="text-gray-600">
+                Analizi tamamlamak için lütfen bilgilerinizi eksiksiz giriniz.
+              </p>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ad Soyad *
+                </label>
+                <input
+                  type="text"
+                  value={answers.contactName}
+                  onChange={(e) => updateAnswer("contactName", e.target.value)}
+                  placeholder="Ad Soyad"
+                  className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Telefon *
+                </label>
+                <input
+                  type="tel"
+                  value={answers.contactPhone}
+                  onChange={(e) => updateAnswer("contactPhone", e.target.value)}
+                  placeholder="05XX XXX XX XX"
+                  className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  E-posta *
+                </label>
+                <input
+                  type="email"
+                  value={answers.contactEmail}
+                  onChange={(e) => updateAnswer("contactEmail", e.target.value)}
+                  placeholder="ornek@email.com"
+                  className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  İlçe *
+                </label>
+                <input
+                  type="text"
+                  value={answers.contactDistrict}
+                  onChange={(e) => updateAnswer("contactDistrict", e.target.value)}
+                  placeholder="İlçe"
+                  className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Şehir *
+                </label>
+                <input
+                  type="text"
+                  value={answers.contactCity}
+                  onChange={(e) => updateAnswer("contactCity", e.target.value)}
+                  placeholder="Şehir"
+                  className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <Button variant="outline" onClick={() => setCurrentStep(4)}>
+                <ChevronLeft className="w-5 h-5 mr-2" />
+                Geri
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={handleAnalyze}
+                disabled={!answers.contactName.trim() || !answers.contactPhone.trim() || !answers.contactEmail.trim() || !answers.contactDistrict.trim() || !answers.contactCity.trim()}
+              >
                 <Sparkles className="w-5 h-5 mr-2" />
                 AI Analizi Başlat
               </Button>
