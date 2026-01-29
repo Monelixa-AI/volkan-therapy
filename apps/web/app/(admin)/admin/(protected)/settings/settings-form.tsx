@@ -101,12 +101,15 @@ export function AdminSettingsForm({
       });
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Kaydedilemedi.");
+        const msg = Array.isArray(data.error)
+          ? data.error.map((e: any) => `${e.path?.join(".")}: ${e.message}`).join(", ")
+          : data.error || "Kaydedilemedi.";
+        throw new Error(msg);
       }
       setResendKeyInput("");
       setStatus("Kaydedildi.");
     } catch (error: any) {
-      setStatus(error.message || "Kaydedilemedi.");
+      setStatus(`Hata: ${error.message || "Kaydedilemedi."}`);
     } finally {
       setIsSaving(false);
     }
@@ -151,7 +154,11 @@ export function AdminSettingsForm({
         </p>
       </div>
 
-      {status && <p className="text-sm text-slate-600">{status}</p>}
+      {status && (
+        <p className={`text-sm font-medium ${status.startsWith("Hata") ? "text-red-600" : "text-green-600"}`}>
+          {status}
+        </p>
+      )}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-slate-900 mb-4">Site Bilgileri</h2>
