@@ -76,11 +76,12 @@ export function FloatingButtons({ siteInfo, chatbotSettings }: FloatingButtonsPr
     setIsChatOpen(!isChatOpen);
   };
 
+  const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isFormValid = formName.trim().length >= 3 && isValidEmail(formEmail.trim());
+
   const handleUserInfoSubmit = () => {
-    const name = formName.trim();
-    const email = formEmail.trim();
-    if (!name || !email) return;
-    setUserInfo({ name, email });
+    if (!isFormValid) return;
+    setUserInfo({ name: formName.trim(), email: formEmail.trim() });
   };
 
   const handleSendMessage = async () => {
@@ -200,7 +201,7 @@ export function FloatingButtons({ siteInfo, chatbotSettings }: FloatingButtonsPr
                   <Button
                     className="w-full rounded-lg text-sm"
                     onClick={handleUserInfoSubmit}
-                    disabled={!formName.trim() || !formEmail.trim()}
+                    disabled={!isFormValid}
                   >
                     Sohbete Başla
                   </Button>

@@ -7,6 +7,9 @@ export async function getSetting<T>(key: string, fallback: T): Promise<T> {
     if (!setting) {
       return fallback;
     }
+    if (typeof fallback === "object" && fallback !== null && !Array.isArray(fallback)) {
+      return { ...fallback, ...(setting.value as object) } as T;
+    }
     return setting.value as T;
   } catch (error) {
     console.warn(`Setting fetch failed: ${key}`, error);
