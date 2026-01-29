@@ -2,6 +2,8 @@ import { prisma } from "@/lib/db";
 import { getBackupSettings, getChatbotSettings, getEmailSettings, getSiteInfo } from "@/lib/site-settings";
 import { AdminSettingsForm } from "./settings-form";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminSettingsPage() {
   const [siteInfo, emailSettings, backupSettings, chatbotSettings, backupRecords] = await Promise.all([
     getSiteInfo(),

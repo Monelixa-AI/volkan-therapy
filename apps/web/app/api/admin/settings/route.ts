@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getAdminFromSession } from "@/lib/admin-auth";
 import { encryptSecret } from "@/lib/encryption";
@@ -122,11 +123,14 @@ export async function PUT(request: Request) {
       setChatbotSettings(chatbotSettings)
     ]);
 
+    revalidatePath("/admin/settings");
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
+    console.error("Settings save error:", error);
     return NextResponse.json({ error: "Kaydedilemedi." }, { status: 500 });
   }
 }
