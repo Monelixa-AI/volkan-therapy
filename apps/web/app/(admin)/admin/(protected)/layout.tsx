@@ -32,6 +32,9 @@ export default async function AdminLayout({
               <Link href="/admin/legal" className="hover:text-slate-900">
                 Yasal
               </Link>
+              <Link href="/admin/chat-logs" className="hover:text-slate-900">
+                Chat
+              </Link>
               <Link href="/admin/settings" className="hover:text-slate-900">
                 Ayarlar
               </Link>

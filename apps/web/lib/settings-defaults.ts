@@ -62,6 +62,8 @@ export type ChatbotSettings = {
   welcomeMessage: string;
   maxMessagesPerSession: number;
   temperature: number;
+  enableNotifications: boolean;
+  notificationMinMessages: number;
 };
 
 export const DEFAULT_CHATBOT_SETTINGS: ChatbotSettings = {
@@ -95,7 +97,9 @@ KURALLAR:
 7. Yanıtlarını kısa ve öz tut (maksimum 2-3 paragraf)`,
   welcomeMessage: "Merhaba! Ben Volkan Terapi Asistanı. Size terapi hizmetlerimiz, çocuk gelişimi veya randevu konularında yardımcı olabilirim. Nasıl yardımcı olabilirim?",
   maxMessagesPerSession: 20,
-  temperature: 0.7
+  temperature: 0.7,
+  enableNotifications: true,
+  notificationMinMessages: 2
 };
 
 export const DEFAULT_SITE_INFO: SiteInfoSettings = {

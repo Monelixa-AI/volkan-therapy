@@ -75,7 +75,9 @@ const chatbotSettingsSchema = z.object({
   systemPrompt: z.string().min(1),
   welcomeMessage: z.string().min(1),
   maxMessagesPerSession: z.number().int().min(1).max(100),
-  temperature: z.number().min(0).max(2)
+  temperature: z.number().min(0).max(2),
+  enableNotifications: z.boolean(),
+  notificationMinMessages: z.number().int().min(1).max(50)
 });
 
 export async function GET() {

@@ -452,3 +452,16 @@ enum ReminderStatus {
   FAILED
   SKIPPED
 }
+
+// ==================== CHAT ====================
+model ChatConversation {
+  id           String    @id @default(cuid())
+  sessionId    String    @unique
+  messages     Json      // [{role, content, timestamp}]
+  messageCount Int       @default(0)
+  startedAt    DateTime  @default(now())
+  endedAt      DateTime?
+  isNotified   Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}

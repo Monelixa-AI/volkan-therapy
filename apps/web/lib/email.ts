@@ -201,6 +201,51 @@ export async function sendTestEmail(to: string, message: string) {
   }
 }
 
+export async function sendChatConversationNotification(data: {
+  sessionId: string;
+  messages: Array<{ role: string; content: string }>;
+  messageCount: number;
+  startedAt: string;
+}) {
+  try {
+    const client = await getEmailClient();
+    const settings = await getEmailSettings();
+    if (!client) {
+      return { success: false };
+    }
+
+    const transcript = data.messages
+      .map(
+        (msg) =>
+          `<div style="margin-bottom:8px;padding:8px;border-radius:8px;background:${msg.role === "user" ? "#e3f2fd" : "#f5f5f5"}"><strong>${msg.role === "user" ? "Kullanıcı" : "Asistan"}:</strong> ${msg.content}</div>`
+      )
+      .join("");
+
+    const startDate = new Date(data.startedAt).toLocaleString("tr-TR", {
+      timeZone: "Europe/Istanbul"
+    });
+
+    await client.resend.emails.send({
+      from: client.from,
+      to: settings.notificationEmail,
+      reply_to: client.replyTo,
+      subject: `Yeni chat görüşmesi (${data.messageCount} mesaj)`,
+      html: `
+        <h2>Yeni Chat Görüşmesi</h2>
+        <p><strong>Tarih:</strong> ${startDate}</p>
+        <p><strong>Mesaj Sayısı:</strong> ${data.messageCount}</p>
+        <hr/>
+        <h3>Konuşma:</h3>
+        ${transcript}
+      `
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Chat notification email error:", error);
+    return { success: false, error };
+  }
+}
+
 export async function sendAdminPasswordResetEmail(to: string, resetUrl: string) {
   try {
     const client = await getEmailClient();

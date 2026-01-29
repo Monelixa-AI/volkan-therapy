@@ -789,6 +789,32 @@ export function AdminSettingsForm({
               }
             />
           </label>
+          <label className="text-sm flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={chatbotSettings.enableNotifications}
+              onChange={(event) =>
+                setChatbotSettings({ ...chatbotSettings, enableNotifications: event.target.checked })
+              }
+            />
+            <span className="text-slate-600">Chat bildirimleri gönder (e-posta)</span>
+          </label>
+          <label className="text-sm">
+            <span className="block text-slate-600 mb-1">Min. mesaj (bildirim icin)</span>
+            <input
+              type="number"
+              min={1}
+              max={50}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+              value={chatbotSettings.notificationMinMessages}
+              onChange={(event) =>
+                setChatbotSettings({
+                  ...chatbotSettings,
+                  notificationMinMessages: Number(event.target.value)
+                })
+              }
+            />
+          </label>
         </div>
         <div className="mt-4">
           <label className="text-sm">

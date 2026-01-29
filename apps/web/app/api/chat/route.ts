@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
+import { prisma } from "@/lib/db";
 import { getChatbotSettings } from "@/lib/site-settings";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +12,10 @@ type ChatMessage = {
 
 export async function POST(request: Request) {
   try {
-    const { messages } = (await request.json()) as { messages: ChatMessage[] };
+    const { messages, sessionId } = (await request.json()) as {
+      messages: ChatMessage[];
+      sessionId?: string;
+    };
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json({ error: "Mesaj gerekli." }, { status: 400 });
@@ -54,7 +58,6 @@ export async function POST(request: Request) {
       "qwen/qwen3-235b-a22b:free"
     ];
 
-    // Deduplicate models in case settings.model is already in the list
     const uniqueModels = [...new Set(fallbackModels)];
 
     let lastError: any;
@@ -71,6 +74,29 @@ export async function POST(request: Request) {
         });
 
         const reply = completion.choices[0]?.message?.content || "";
+
+        // Log conversation to DB (non-blocking)
+        if (sessionId) {
+          const allMessages = [
+            ...messages.map((m) => ({ ...m, timestamp: new Date().toISOString() })),
+            { role: "assistant" as const, content: reply, timestamp: new Date().toISOString() }
+          ];
+          prisma.chatConversation
+            .upsert({
+              where: { sessionId },
+              create: {
+                sessionId,
+                messages: allMessages,
+                messageCount: allMessages.length
+              },
+              update: {
+                messages: allMessages,
+                messageCount: allMessages.length
+              }
+            })
+            .catch((err) => console.error("Chat log error:", err));
+        }
+
         return NextResponse.json({ reply });
       } catch (err: any) {
         lastError = err;
