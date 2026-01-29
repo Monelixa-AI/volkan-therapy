@@ -748,12 +748,24 @@ export function AdminSettingsForm({
                 setChatbotSettings({ ...chatbotSettings, model: event.target.value })
               }
             >
-              <option value="deepseek/deepseek-r1-0528:free">DeepSeek R1 (Free)</option>
-              <option value="google/gemini-2.5-flash-preview:free">Gemini 2.5 Flash (Free)</option>
-              <option value="meta-llama/llama-4-maverick:free">Llama 4 Maverick (Free)</option>
-              <option value="google/gemma-3-27b-it:free">Gemma 3 27B (Free)</option>
-              <option value="microsoft/phi-4-reasoning-plus:free">Phi-4 Reasoning (Free)</option>
-              <option value="qwen/qwen3-235b-a22b:free">Qwen 3 235B (Free)</option>
+              <optgroup label="Ücretsiz Modeller">
+                <option value="deepseek/deepseek-r1-0528:free">DeepSeek R1 (Free)</option>
+                <option value="google/gemini-2.5-flash-preview:free">Gemini 2.5 Flash (Free)</option>
+                <option value="meta-llama/llama-4-maverick:free">Llama 4 Maverick (Free)</option>
+                <option value="google/gemma-3-27b-it:free">Gemma 3 27B (Free)</option>
+                <option value="microsoft/phi-4-reasoning-plus:free">Phi-4 Reasoning (Free)</option>
+                <option value="qwen/qwen3-235b-a22b:free">Qwen 3 235B (Free)</option>
+              </optgroup>
+              <optgroup label="Ücretli Modeller">
+                <option value="anthropic/claude-sonnet-4">Claude Sonnet 4 (Ücretli)</option>
+                <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Ücretli)</option>
+                <option value="openai/gpt-4o">GPT-4o (Ücretli)</option>
+                <option value="openai/gpt-4o-mini">GPT-4o Mini (Ücretli)</option>
+                <option value="google/gemini-2.5-pro-preview">Gemini 2.5 Pro (Ücretli)</option>
+                <option value="google/gemini-2.5-flash-preview">Gemini 2.5 Flash (Ücretli)</option>
+                <option value="deepseek/deepseek-r1">DeepSeek R1 (Ücretli)</option>
+                <option value="meta-llama/llama-4-maverick">Llama 4 Maverick (Ücretli)</option>
+              </optgroup>
             </select>
           </label>
           <label className="text-sm">
