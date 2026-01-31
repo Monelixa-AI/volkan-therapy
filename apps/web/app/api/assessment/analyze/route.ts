@@ -20,6 +20,23 @@ async function callGoogleAI(prompt: string): Promise<string> {
   return text;
 }
 
+async function callOpenAI(prompt: string): Promise<string> {
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+  });
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: prompt }
+    ],
+    temperature: 0.7,
+    max_tokens: 2000
+  });
+  return completion.choices[0].message.content || "";
+}
+
 async function callOpenRouterAI(prompt: string): Promise<string> {
   const openai = new OpenAI({
     apiKey: process.env.OPENROUTER_API_KEY,
@@ -78,23 +95,29 @@ export async function POST(request: Request) {
 
     let aiResponse: string;
 
-    // Google AI öncelikli, başarısız olursa OpenRouter'a düş
-    if (process.env.GOOGLE_AI_API_KEY) {
+    // OpenAI öncelikli > Google AI > OpenRouter fallback zinciri
+    const providers: { name: string; fn: () => Promise<string>; available: boolean }[] = [
+      { name: "OpenAI", fn: () => callOpenAI(prompt), available: !!process.env.OPENAI_API_KEY },
+      { name: "Google AI", fn: () => callGoogleAI(prompt), available: !!process.env.GOOGLE_AI_API_KEY },
+      { name: "OpenRouter", fn: () => callOpenRouterAI(prompt), available: !!process.env.OPENROUTER_API_KEY }
+    ];
+
+    const available = providers.filter(p => p.available);
+    if (available.length === 0) throw new Error("No AI API key configured");
+
+    let lastErr: any;
+    for (const provider of available) {
       try {
-        aiResponse = await callGoogleAI(prompt);
-      } catch (googleErr) {
-        console.error("Google AI failed, trying OpenRouter:", googleErr);
-        if (process.env.OPENROUTER_API_KEY) {
-          aiResponse = await callOpenRouterAI(prompt);
-        } else {
-          throw googleErr;
-        }
+        console.log(`Trying ${provider.name}...`);
+        aiResponse = await provider.fn();
+        console.log(`${provider.name} succeeded`);
+        break;
+      } catch (err) {
+        console.error(`${provider.name} failed:`, err);
+        lastErr = err;
       }
-    } else if (process.env.OPENROUTER_API_KEY) {
-      aiResponse = await callOpenRouterAI(prompt);
-    } else {
-      throw new Error("No AI API key configured");
     }
+    if (!aiResponse!) throw lastErr;
 
     const analysisResult = parseAIResponse(aiResponse);
 
