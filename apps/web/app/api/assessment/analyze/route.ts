@@ -26,10 +26,12 @@ async function callOpenRouterAI(prompt: string): Promise<string> {
 
   // Ücretsiz modeller sırayla denenecek
   const freeModels = [
-    "meta-llama/llama-3.2-3b-instruct:free",
-    "google/gemma-2-9b-it:free",
-    "microsoft/phi-3-mini-128k-instruct:free",
-    "google/gemini-2.0-flash-exp:free"
+    "deepseek/deepseek-r1-0528:free",
+    "google/gemini-2.5-flash-preview:free",
+    "meta-llama/llama-4-maverick:free",
+    "google/gemma-3-27b-it:free",
+    "microsoft/phi-4-reasoning-plus:free",
+    "qwen/qwen3-235b-a22b:free"
   ];
 
   let lastError: any;
