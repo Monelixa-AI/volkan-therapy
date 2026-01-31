@@ -76,20 +76,20 @@ export async function POST(request: Request) {
 
     let aiResponse: string;
 
-    // OpenRouter öncelikli, başarısız olursa Google AI'ya düş
-    if (process.env.OPENROUTER_API_KEY) {
+    // Google AI öncelikli, başarısız olursa OpenRouter'a düş
+    if (process.env.GOOGLE_AI_API_KEY) {
       try {
-        aiResponse = await callOpenRouterAI(prompt);
-      } catch (openRouterErr) {
-        console.error("OpenRouter failed, trying Google AI:", openRouterErr);
-        if (process.env.GOOGLE_AI_API_KEY) {
-          aiResponse = await callGoogleAI(prompt);
+        aiResponse = await callGoogleAI(prompt);
+      } catch (googleErr) {
+        console.error("Google AI failed, trying OpenRouter:", googleErr);
+        if (process.env.OPENROUTER_API_KEY) {
+          aiResponse = await callOpenRouterAI(prompt);
         } else {
-          throw openRouterErr;
+          throw googleErr;
         }
       }
-    } else if (process.env.GOOGLE_AI_API_KEY) {
-      aiResponse = await callGoogleAI(prompt);
+    } else if (process.env.OPENROUTER_API_KEY) {
+      aiResponse = await callOpenRouterAI(prompt);
     } else {
       throw new Error("No AI API key configured");
     }
