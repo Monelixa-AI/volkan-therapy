@@ -8,7 +8,7 @@ const systemPrompt =
 
 async function callGoogleAI(prompt: string): Promise<string> {
   const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY!);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
   const result = await model.generateContent([
     { text: systemPrompt },
@@ -76,9 +76,18 @@ export async function POST(request: Request) {
 
     let aiResponse: string;
 
-    // OpenRouter öncelikli (Google AI Türkiye'den erişilemez)
+    // OpenRouter öncelikli, başarısız olursa Google AI'ya düş
     if (process.env.OPENROUTER_API_KEY) {
-      aiResponse = await callOpenRouterAI(prompt);
+      try {
+        aiResponse = await callOpenRouterAI(prompt);
+      } catch (openRouterErr) {
+        console.error("OpenRouter failed, trying Google AI:", openRouterErr);
+        if (process.env.GOOGLE_AI_API_KEY) {
+          aiResponse = await callGoogleAI(prompt);
+        } else {
+          throw openRouterErr;
+        }
+      }
     } else if (process.env.GOOGLE_AI_API_KEY) {
       aiResponse = await callGoogleAI(prompt);
     } else {
