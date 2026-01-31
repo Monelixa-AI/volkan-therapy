@@ -10,7 +10,7 @@ async function callGoogleAI(prompt: string): Promise<string> {
   const apiKey = process.env.GOOGLE_AI_API_KEY!;
   console.log("Google AI key exists:", !!apiKey, "length:", apiKey.length);
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const result = await model.generateContent(systemPrompt + "\n\n" + prompt);
 
