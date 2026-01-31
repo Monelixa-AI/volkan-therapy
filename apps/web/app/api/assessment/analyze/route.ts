@@ -7,15 +7,17 @@ const systemPrompt =
   "Sen pediatrik gelişim uzmanı bir asistansın. Ailelerin çocukları hakkında verdikleri bilgileri analiz ederek, duyusal bütünleme, dikkat eksikliği, otizm spektrum belirtileri ve öğrenme güçlükleri açısından değerlendirme yapıyorsun. ÖNEMLİ: Bu bir ön değerlendirmedir, kesin tanı değildir. Her zaman profesyonel değerlendirme öner. Yanıtlarını Türkçe ver ve ailelerle sıcak, anlayışlı bir dil kullan.";
 
 async function callGoogleAI(prompt: string): Promise<string> {
-  const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY!);
+  const apiKey = process.env.GOOGLE_AI_API_KEY!;
+  console.log("Google AI key exists:", !!apiKey, "length:", apiKey.length);
+  const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-  const result = await model.generateContent([
-    { text: systemPrompt },
-    { text: prompt }
-  ]);
+  const result = await model.generateContent(systemPrompt + "\n\n" + prompt);
 
-  return result.response.text();
+  const response = result.response;
+  const text = response.text();
+  console.log("Google AI response length:", text.length);
+  return text;
 }
 
 async function callOpenRouterAI(prompt: string): Promise<string> {
@@ -111,7 +113,7 @@ export async function POST(request: Request) {
       analysis: analysisResult
     });
   } catch (error: any) {
-    console.error("AI Analysis error:", error);
+    console.error("AI Analysis error:", error?.message || error, JSON.stringify(error, null, 2));
 
     let errorMessage = "Analiz sırasında bir hata oluştu";
 
